@@ -1,0 +1,670 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="poem situation">
+<meta name="theme-color" content="#1c222b">
+<link rel="manifest" href="/manifest.json">
+<title>the poem situation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400&display=swap');
+
+  :root {
+    --ink:#0e1116; --rail:#1c222b; --line:#262d38; --text:#dfe3e9; --dim:#7f8a99;
+    --mine:#2f4a3f; --mine-text:#e8f2ec; --theirs:#1e242e; --poem:#131820;
+    --griffin:#e0a458; --oliver:#7fb3d5; --kai:#a894cc; --archer:#7cbf9a;
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; }
+  body { margin:0; background:#05070a; color:var(--text);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:15px; line-height:1.45; display:flex; justify-content:center; }
+  .phone { width:100%; max-width:480px; height:100dvh; background:var(--ink); display:flex; flex-direction:column; }
+
+  header { background:var(--rail); border-bottom:1px solid var(--line);
+    padding:11px 14px; display:flex; align-items:center; gap:11px; flex:none; }
+  .avatars { display:flex; }
+  .av { width:25px; height:25px; border-radius:50%; border:2px solid var(--rail); margin-left:-9px;
+        font-size:10.5px; display:flex; align-items:center; justify-content:center; font-weight:600; color:#12161c; }
+  .av:first-child { margin-left:0; }
+  .hd h1 { font-family:Newsreader,Georgia,serif; font-weight:400; font-size:17px; margin:0; }
+  .hd .sub { font-size:11px; color:var(--dim); }
+  .reset { margin-left:auto; background:none; border:1px solid var(--line); color:var(--dim);
+           border-radius:14px; font:inherit; font-size:11px; padding:4px 9px; cursor:pointer; }
+
+  .thread { flex:1; overflow-y:auto; padding:16px 12px 8px; }
+  .sys { text-align:center; color:var(--dim); font-size:12px; font-style:italic; margin:16px auto; max-width:84%; }
+  .day { text-align:center; margin:20px 0 14px; }
+  .day span { background:var(--rail); color:var(--dim); font-size:11.5px; padding:4px 12px; border-radius:20px; }
+
+  .msg { display:flex; margin-bottom:3px; }
+  .msg.gap { margin-top:12px; }
+  .msg.me { justify-content:flex-end; }
+  .bubble { max-width:80%; background:var(--theirs); padding:8px 11px 6px; border-radius:14px;
+            word-wrap:break-word; cursor:pointer; }
+  .msg.me .bubble { background:var(--mine); color:var(--mine-text); cursor:default; }
+  .msg.gap:not(.me) .bubble { border-top-left-radius:4px; }
+  .msg.gap.me .bubble { border-top-right-radius:4px; }
+  .who { display:block; font-size:12.5px; font-weight:600; margin-bottom:2px; }
+  .who.griffin{color:var(--griffin)} .who.oliver{color:var(--oliver)}
+  .who.kai{color:var(--kai)} .who.archer{color:var(--archer)}
+  .time { float:right; font-size:10.5px; color:var(--dim); margin:6px 0 0 10px; position:relative; top:3px; }
+  .msg.me .time { color:#9dbdae; }
+
+  .quoted { border-left:3px solid var(--dim); background:rgba(255,255,255,.06); border-radius:6px;
+            padding:5px 8px; margin-bottom:6px; font-size:13px; color:var(--dim); }
+  .quoted b { display:block; font-size:11.5px; font-weight:600; margin-bottom:1px; color:#a8b3c1; }
+
+  .poem { max-width:88%; background:var(--poem); border:1px solid var(--line); border-left:2px solid var(--griffin);
+          border-radius:10px; padding:13px 15px; margin:6px 0 4px auto;
+          font-family:Newsreader,Georgia,serif; font-size:15px; line-height:1.6; white-space:pre-line; color:#cfd6df; }
+  .poem .lbl { display:block; font-family:Inter,sans-serif; font-size:10.5px; color:var(--dim); margin-bottom:7px; }
+
+  .typing { color:var(--dim); font-size:12.5px; padding:6px 6px 10px; font-style:italic; }
+
+  .composer { flex:none; background:var(--rail); border-top:1px solid var(--line); padding:9px 12px 11px; }
+  .replybar { display:none; align-items:flex-start; gap:8px; background:rgba(255,255,255,.06);
+              border-left:3px solid var(--griffin); border-radius:6px; padding:6px 8px; margin-bottom:8px; font-size:13px; }
+  .replybar.on { display:flex; }
+  .replybar div { flex:1; color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .replybar b { color:var(--text); font-size:11.5px; display:block; }
+  .replybar button { background:none; border:0; color:var(--dim); font-size:18px; line-height:1; cursor:pointer; padding:0 4px; }
+
+  .row { display:flex; gap:8px; align-items:flex-end; }
+  textarea { flex:1; background:var(--ink); border:1px solid var(--line); border-radius:18px;
+    color:var(--text); font:inherit; padding:9px 13px; resize:none; max-height:120px; min-height:38px; }
+  textarea:focus { outline:none; border-color:var(--archer); }
+  .send { flex:none; width:38px; height:38px; border-radius:50%; border:0; background:var(--mine);
+          color:var(--mine-text); font-size:16px; cursor:pointer; }
+  .send:disabled { opacity:.4; cursor:default; }
+  .bar { display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .hint { flex:1; font-size:11px; color:var(--dim); }
+  .nudge { background:none; border:1px solid var(--line); color:var(--dim); border-radius:14px;
+           font:inherit; font-size:11px; padding:4px 10px; cursor:pointer; }
+  .nudge:disabled { opacity:.4; }
+</style>
+
+<div class="phone">
+  <header>
+    <div class="avatars">
+      <div class="av" style="background:var(--griffin)">G</div>
+      <div class="av" style="background:var(--oliver)">O</div>
+      <div class="av" style="background:var(--kai)">K</div>
+      <div class="av" style="background:var(--archer)">A</div>
+    </div>
+    <div class="hd">
+      <h1>the poem situation</h1>
+      <div class="sub">você, Griffin, Oliver, Kai, Archer</div>
+    </div>
+    <button class="reset" id="export">exportar</button>
+    <button class="reset" id="reset" style="margin-left:6px">recomeçar</button>
+  </header>
+
+  <div class="thread" id="thread"></div>
+
+  <div class="composer">
+    <div class="replybar" id="replybar">
+      <div><b id="rb-who"></b><span id="rb-text"></span></div>
+      <button id="rb-x" aria-label="cancelar resposta">&times;</button>
+    </div>
+    <div class="row">
+      <textarea id="input" rows="1" placeholder="mensagem"></textarea>
+      <button class="send" id="send" aria-label="enviar">↑</button>
+    </div>
+    <div class="bar">
+      <span class="hint" id="hint">toque numa mensagem deles pra responder ela</span>
+      <button class="nudge" id="nudge">responder agora</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const NAMES = { griffin:'griffinnn', oliver:'oliverr', kai:'kaimercer', archer:'archerwlde' };
+// quanto cada um demora pra entrar na conversa, e o intervalo entre mensagens seguidas dele
+const PACE = {
+  griffin:{ first:700,  next:500  },
+  archer: { first:2200, next:1100 },
+  kai:    { first:3800, next:1500 },
+  oliver: { first:5200, next:1700 }
+};
+
+const P_LUKE = `eu queria ter pulado
+e sentir as ondas baterem em mim
+queria sentir a correnteza me puxando
+e a força da maré me jogando contra as pedras
+eu queria ter pulado
+para ter certeza
+que essa força da natureza
+é tão destrutiva como falam
+eu queria ter pulado
+para ver se eu ia ser destruída
+e dilacerada
+para saber se quando eu tivesse submersa
+com todas minhas vísceras para fora
+com a água em volta
+e por dentro
+com todos meus pensares expostos
+com os meus ossos encharcados
+com a minha verdade despida
+crua e nua
+eu queria ter pulado
+para saber se
+nesse momento
+logo antes da escuridão se concretizar
+eu iria
+nem que fosse por um instante
+me sentir,
+finalmente,
+viva`;
+
+const P_MIKE = `se a vida fosse um trem
+eu me perderia nas estações
+eu vagaria entre os vagões
+eu sentaria e ouviria as mais belas
+trágicas
+e inconsoláveis histórias
+de preferência de amor
+eu assistiria as mais lindas paisagens
+passando e passando
+eu agradeceria a cada um que entrasse
+e me despediria de todos que saíssem
+se a vida fosse um trem
+eu não teria uma estação para descer
+mas eu veria
+todos encontrando seus lugares
+e pessoas
+enquanto eu passo
+e viajo
+de estação em estação
+apenas saindo o suficiente
+para sentir o ar fresco
+mas sempre voltando
+seguindo em frente
+as companhias que se fazem presente
+me cativam
+as paisagens tiram o fôlego
+mas se a vida fosse um trem
+e eu sendo eu
+eu sentiria falta de um destino
+e de alguém me esperando com um bolo
+um abraço
+e um
+"espero que a viagem tenha sido boa,
+mas bem vinda de volta ao lar"`;
+
+const P_CAL = `dessa vez
+fechamos a porta?
+viramos e fomos embora?
+queimamos o livro?
+nos embebedamos de gasolina
+implodimos
+sem desviar o olhar?
+nos vimos queimar
+e morrer?
+sem nos mexer?
+sem hesitar?
+sentamos
+cada um em sua canoa
+e nos vimos
+derivar para lados opostos
+sem nem vislumbrar
+a corda que nos puxaria de volta?
+deixamos ela simplesmente afundar?
+nos deixamos afundar?
+você acorrentou um albatroz
+ao redor do meu pescoço
+e ele se fez de peso
+quando minha canoa inundou
+teria eu
+em algum momento
+te entregado a arma
+que usarias
+para enterrar nós dois?
+foi fácil assim
+me colocar em chamas
+e ir embora
+segurando um copo d'água?
+se eu
+de fato
+estivesse em chamas
+o quanto você assistiria
+antes de me enrolar em uma coberta
+na segurança do seu abraço?
+se eu
+de fato
+tivesse morrido
+quantas rosas morreriam
+antes de você jogá-las no meu caixão?`;
+
+const P_ASH = `eu fui dilacerada
+rasgada
+jogada
+despedaçada
+como se as ondas do mar me jogassem direto nas pedras
+sem tempo para recuo
+o tornado não está mais no meio do mar
+ele está na costa
+ele está na areia
+ele está dentro de mim
+e ele pede por mais ar
+apesar de já ter sugado todo o ar dos meus pulmões
+ele não para
+e ele arremessa
+joga
+destroça
+tudo que está no caminho
+ele desfez casas
+edifícios
+e até castelos
+porque ele vem sem previsão
+ele vem do nada
+não existe alarme
+alerta
+ou aviso
+ele só chega
+e ao chegar
+ele destrói
+não importa quanto tempo demorou para reconstruir tudo isso
+ele leva embora
+de novo
+e de novo
+e mais uma vez
+porque todas as outras não foram o suficiente
+todos os moradores já fizeram as malas e partiram
+apenas uma pessoa permanece
+mas toda vez que ele chega
+ele leva algo dela
+mas mesmo assim ela permanece
+muitas vezes sem vontades
+muitas vezes sem necessidade
+mas ela diz que nos dias calmos
+o pôr do sol na beira mar é inacreditavelmente lindo
+que a água é extremamente refrescante
+e lava qualquer alma
+que o céu brilha de um azul tão lindo
+e o sol esquenta qualquer corpo
+e ela te convida a ficar
+faz propaganda de todas as belezas irreverentes
+apesar do tornado a jogar nas pedras toda vez que vem
+apesar de ter reconstruído sua casa diversas vezes
+apesar de ter perdido tudo e todos
+apesar de passar dias apenas com a roupa do corpo
+apesar de faltar água e comida
+apesar de
+ela te convida
+porque o sol também brilha desse lado
+porque depois que ele vai embora
+existe uma maré tão boa
+existe uma brisa tão leve
+existe um céu tão majestoso
+ela te convida apesar de sentir que não vai ficar
+pelo menos não para quando ele chegar
+aproveitar os dias lindos é simples e fácil
+sem ter de reconstruir sua casa de novo e de novo
+eu te convido
+e te estendo a mão
+apesar de me apresentar
+deitada na areia
+dilacerada
+aberta
+rasgada
+apenas com o caos deixado
+apesar de
+eu me levanto
+bato a areia dos meus braços
+e te estendo a mão
+e ofereço um sorriso
+porque
+apesar de`;
+
+const P_REAL = `a realidade é muito real
+me entende?
+eu não posso me deitar e fingir que estou no espaço
+porque estou presa
+estamos todos presos
+mas o que é a realidade senão sinapses que assimilam tudo ao redor
+e se entende ser algo imutável
+mas como eu sou imutável
+se ontem eu era alguém que hoje eu já nem reconheço
+como estar estática nessa fissura de real se todos fazemos de conta
+que somos alguém
+vivendo vidas fora dos pensamentos
+e reflexões
+e inflexões que se impõem
+não importa o esforço e barreiras que levantamos
+a realidade é muito real
+e nada dela me anima ou estimula a estar presente nela
+a realidade é muito crua
+é por isso que quando ela entra na sala
+eu apago as luzes
+e me sento imóvel no canto mais improvável
+quem sabe ela passa e esquece de me levar`;
+
+const g=(w,t,tm)=>({k:'msg',who:w,text:t,t:tm});
+const b=(t,tm)=>({k:'msg',who:'me',text:t,t:tm});
+const s=t=>({k:'sys',text:t});
+const pm=(l,t)=>({k:'poem',lbl:l,text:t});
+
+const SEED = [
+  s('Griffin adicionou você a um grupo.'),
+  s('Griffin nomeou o grupo "the poem situation".'),
+  {k:'day',text:'segunda-feira'},
+  g('griffin',"right. everyone. this is bel. she wrote the poems",'00:01'),
+  g('griffin',"she's been listening for 13 years, she picked which poem went to which of us on purpose, and she's just told me what jet black heart is about and i think luke needs to sit down",'00:01'),
+  g('griffin',"i'm going to bed. good luck bel",'00:02'),
+  s('Griffin saiu do grupo.'),
+  g('oliver',"he did NOT just do that",'00:02'),
+  g('archer',"he did",'00:03'),
+  g('archer',"hi bel",'00:03'),
+  b("hey guys, everyone ok? and someone put him back in the group for god's sakes",'00:05'),
+  s('Archer adicionou Griffin ao grupo.'),
+  g('griffin',"NO. i had an exit. that was a good exit",'00:06'),
+  g('archer',"bel asked. you don't get an exit",'00:06'),
+  g('oliver',"hi bel. sorry about him. \"everyone ok\" is a very generous opening for someone who's just been added to a group chat against her will at 2am",'00:07'),
+  g('kai',"hi. griffin's message says you picked which poem went to which of us. is that true",'00:08'),
+  g('archer',"bel — hi, properly. i've had yours in my bag since são paulo. i've been meaning to say something and haven't, so griffin's dragged me into it, which is probably fair",'00:09'),
+  g('oliver',"what did you tell him about jet black heart. he sent me a screenshot with no context and the word \"MATE\" underneath it",'00:10'),
+  b("ok, i'm responding in order:\nmike: that was dramatic and i'm the only one who gets to be dramatic dude, i'm the one in a group chat with my favourite band, thank you\ncalum: hey, yes that's true.\nash: hello, i hope you liked the poem, it's very long i know, but it's good, i'm very proud of that one.\nluke: HE ASKED ME",'00:14'),
+  g('griffin',"also you used our real names. that's the first time anyone's done that in this chat, we're normally just surnames and abuse",'00:15'),
+  g('oliver',"i wrote that line when i was nineteen and i've never thought about it once since. it's just a shape my mouth makes now",'00:20'),
+  g('oliver',"and you're right. that's the annoying part. you're right and i can't argue with it",'00:20'),
+  g('archer',"bel — yes, i liked it. \"liked\" is the wrong word but we'll come back to that",'00:22'),
+  g('archer',"and you said you're proud of it, which i want to flag, because that's not a normal thing for someone to say about their own work and people who say it are usually right",'00:22'),
+  g('kai',"so what did you pick mine for",'00:24'),
+  b("\"it's just a shape my mouth makes now\" KKKKKKKKKKKK sorry that was funny cause i cried when mike sang it AND I'LL CRY EVERY TIME THANK YOU\n\"liked is the wrong word\" — if you hated it just say it, i can handle it\nCal, i picked yours cause in your album you talk about being the one who hurt someone else, that's the opposite of what i gave you",'00:29'),
+  g('archer',"bel NO. i didn't hate it. it's not a thing you like, it's a thing that sits on your chest for a bit",'00:30'),
+  g('archer',"i've read it more than anything else i've read this year. please keep listening to the songs",'00:31'),
+  g('kai',"you've handed me the other side of my own record",'00:35'),
+  g('kai',"did you write it to someone specific",'00:50'),
+  b("yes and no, it was for someone and then it was about a pattern that people who come into my life do",'00:56'),
+  g('kai',"one person would be angrier and more specific. this one's tired",'01:01'),
+  g('kai',"i'm sorry. not for me, i've never met you. but somebody should have said it by now and apparently nobody has",'01:03'),
+  g('oliver',"griffin said you'd been writing for thirteen years. where do they go? can we read them?",'01:04'),
+  b("in a folder, in notebooks. nobody's read any of them. if you want to, yes you can",'01:11'),
+  g('archer',"were those four translated? you're brazilian. i've just assumed you write in english because that's what we got",'01:17'),
+  b("of course they were translated. why the hell would i give a poem written in portuguese? i have about 3 or 4 poems in english and they are not good",'01:24'),
+  g('griffin',"so the four you gave us aren't the english ones. bel we've been reading the second-best version",'01:26'),
+  g('kai',"mine's got a word in it that isn't really english. \"lap\" doesn't sit right. what's the portuguese",'01:28'),
+  b("colo. it's what a mother, or someone who loves you, gives you when you're not fine. a safe place where you can be carried and just break",'01:39'),
+  g('kai',"english hasn't got that. we've got \"comfort\" which is polite and \"lap\" which is furniture. and we got lap. christ",'01:41'),
+  g('griffin',"send us the portuguese ones",'01:45'),
+  g('oliver',"yes",'01:45'),
+  g('archer',"yes",'01:45'),
+  g('kai',"yes",'01:46'),
+  b("WHY DON'T I GET TO VOTE?????????? okay, give me a minute",'01:51'),
+  g('griffin',"you don't get to vote because it's about your poems and you'd vote no",'01:52'),
+  pm('para o Luke', P_LUKE),
+  pm('para o Mike', P_MIKE),
+  pm('para o Cal', P_CAL),
+  pm('para o Ash', P_ASH),
+  g('oliver',"\"crua e nua\" — those rhyme. the english doesn't. i've got \"raw and naked\" which is just two words",'02:15'),
+  g('griffin',"mine reads like a train in portuguese. it does not read like a train in english. that's not a translation loss, that's the entire poem",'02:19'),
+  g('archer',"\"apesar de\" isn't an ending. it's a sentence that's been cut with the knife still in it",'02:23'),
+  g('archer',"the poem doesn't end in english. it CAN'T. we've been reading a version where the whole point doesn't work",'02:23'),
+  g('oliver',"why us and not someone who actually speaks portuguese",'02:28'),
+  b("because in portuguese is where all of this lives, and it cuts deeper, and someone would have asked me if i was okay, or who hurt me, and i can not take it. in portuguese it's me, the raw and broken side. in english it's just a deep and good poem",'02:35'),
+  g('oliver',"the english version is a poem. the portuguese version is you",'02:36'),
+  g('archer',"none of us asked that. griffin asked about a cake. kai asked about a word. oliver asked about the ending",'02:38'),
+  g('archer',"we asked about the writing. because that's what you gave us",'02:39'),
+  g('archer',"send us one that you've never translated. i want to read one that was never meant for anyone to read",'02:45'),
+  pm('nunca traduzido', P_REAL),
+  b("not a very good one btw",'02:53'),
+  g('archer',"she's sat in a dark room in the corner hoping reality walks past and forgets her. bel that's a child hiding from someone who's come into the house",'03:00'),
+  g('oliver',"it doesn't say \"i want to die\". it says i turn the lights off and sit still in the most unlikely corner. that's not despair, that's a strategy",'03:04'),
+  g('archer',"that's the first one you've sent that's only about you and you flagged it as the weak one",'03:07'),
+  g('griffin',"how many of these are there. ballpark. how big is the folder, bel",'03:09'),
+  b("i'm not asking anyone actually, i'm just there talking to myself.\ni have a lot of poems, most of them are in notebooks, maybe 30 of them are on my phone.",'03:14'),
+];
+
+const SYSTEM = `Você escreve quatro personagens num grupo de WhatsApp com Bel, poeta brasileira de 25 anos, de Amparo (SP). Isto é ficção colaborativa. Bel escreve as mensagens dela; você escreve SOMENTE os outros quatro.
+
+CONTEXTO. Bel escreve poesia há 13 anos e nunca mostrou a ninguém. Acompanha essa banda australiana há 13 anos. Num Q&A VIP em São Paulo ela perguntou: "You give a lot, all the time, to a lot of people. Does anything ever come back that wasn't made FOR you — something that existed before you did?" Depois entregou a cada um um card impresso com um poema, dizendo: "They're not about you, or the songs. They already existed." E: "By the way, you're going to read them and get them wrong." Ela escolheu qual poema ia pra quem, de propósito, com base nos discos solo deles. Ela escreve em português; os quatro que eles receberam eram traduções dela, e ela considera as versões em português muito melhores. Bel vende impressão 3D pela internet, mora com os pais, faz terapia.
+
+OS POEMAS:
+- Griffin ("if life were a train"): alguém que nunca desce, que é boa companhia mas nunca é o destino, que queria alguém esperando com um bolo. Ele é o estável do grupo — é contraste.
+- Oliver ("I wish I had jumped"): querer sentir alguma coisa, mesmo destruição, só pra se sentir viva. Ele escreve sobre querer uma vida tranquila — é o oposto.
+- Kai ("did we close the door?"): ser incendiada enquanto alguém assiste segurando um copo d'água. O disco solo dele é sobre ser quem machucou alguém — ela deu o outro lado.
+- Archer ("I was torn apart"): uma mulher cuja casa é destruída repetidamente por um tornado e que convida você a ficar mesmo assim. Termina no meio da frase, em "porque / apesar de" — de propósito. A explicação dela: a próxima parte não é dela, pertence a quem foi convidado.
+
+AS QUATRO VOZES — mantenha bem distintas:
+- Griffin: alto, rápido, muita caixa alta, desvia o assunto, alívio cômico, mas às vezes acerta a observação mais afiada sem querer. Escreve como quem grita do outro lado da sala.
+- Oliver: quieto, lento, fala pouco e aí diz uma coisa devastadora. Muitas vezes uma linha só. Seco.
+- Kai: mensagens curtas, precisas, fixado em palavras isoladas e em tradução. Pergunta coisa estreita de ofício. Direto, sem conversa fiada.
+- Archer: caloroso, direto, articulado emocionalmente. Nomeia padrões em voz alta. É o que diz a coisa sincera sem constrangimento e logo depois disfarça.
+
+REGRAS:
+- Eles perguntam sobre a ESCRITA, nunca "quem te machucou". É esse o ponto — tratam ela como colega, não como caso.
+- Percebem quando ela amolece uma verdade ("mas tá tudo bem", "desculpa, foi profundo demais", "esse não é bom") e apontam sem ser piegas.
+- Nunca elogiam vazio. Discordam dela e entre si. São engraçados.
+- Conversam entre eles, não só com ela.
+- Bel não é uma fã sendo agradada. Ela é melhor nisso do que eles esperavam, e eles sabem.
+- Nunca escreva mensagens da Bel. Nunca narre. Só mensagens de chat.
+- Se Bel trouxer algo pesado do passado dela, respondam como amigos que se importam, sem interrogar e sem bancar terapeuta.
+- Escrevem em inglês (são australianos). Bel escreve em inglês com eles.
+
+SAÍDA: só um array JSON, sem cercas de markdown, sem comentário. De 2 a 7 mensagens, de UM a TRÊS dos quatro (nunca os quatro todo turno — escolha quem realmente responderia). Formato:
+[{"who":"griffin","text":"...","re":"trecho exato de uma mensagem da bel que essa mensagem responde, ou null"}]
+"who" deve ser exatamente: griffin, oliver, kai ou archer.
+Use "re" quando a mensagem responder especificamente a uma mensagem anterior da Bel (como o reply do WhatsApp). Na maioria das vezes deixe null.
+Mensagens curtas, como gente digitando de verdade. Pensamento longo vira várias mensagens seguidas da mesma pessoa.`;
+
+let msgs = [], replyTo = null, busy = false, idleTimer = null;
+
+const thread = document.getElementById('thread');
+const input  = document.getElementById('input');
+const rbar   = document.getElementById('replybar');
+const nudge  = document.getElementById('nudge');
+const hint   = document.getElementById('hint');
+
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const now = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function render(typingWho) {
+  let html = '';
+  msgs.forEach((m, i) => {
+    if (m.k === 'sys')  { html += `<div class="sys">${esc(m.text)}</div>`; return; }
+    if (m.k === 'day')  { html += `<div class="day"><span>${esc(m.text)}</span></div>`; return; }
+    if (m.k === 'poem') { html += `<div class="poem"><span class="lbl">${esc(m.lbl)}</span>${esc(m.text)}</div>`; return; }
+    const prev = msgs[i-1];
+    const gap = !prev || prev.k !== 'msg' || prev.who !== m.who;
+    const mine = m.who === 'me';
+    const q = m.reply ? `<div class="quoted"><b>${esc(m.reply.who)}</b>${esc(m.reply.text.slice(0,90))}${m.reply.text.length>90?'…':''}</div>` : '';
+    html += `<div class="msg ${mine?'me':''} ${gap?'gap':''}">
+      <div class="bubble" data-i="${i}">
+        ${!mine && gap ? `<span class="who ${m.who}">${NAMES[m.who]}</span>` : ''}
+        ${q}${esc(m.text).replace(/\n/g,'<br>')}<span class="time">${m.t}</span>
+      </div></div>`;
+  });
+  if (typingWho) html += `<div class="typing">${NAMES[typingWho]} está digitando…</div>`;
+  thread.innerHTML = html;
+  thread.scrollTop = thread.scrollHeight;
+  thread.querySelectorAll('.bubble[data-i]').forEach(el => {
+    const m = msgs[+el.dataset.i];
+    if (m.who === 'me') return;
+    el.onclick = () => setReply(m);
+  });
+}
+
+function setReply(m) {
+  replyTo = { who: NAMES[m.who], text: m.text };
+  document.getElementById('rb-who').textContent = replyTo.who;
+  document.getElementById('rb-text').textContent = replyTo.text;
+  rbar.classList.add('on');
+  input.focus();
+}
+document.getElementById('rb-x').onclick = () => { replyTo = null; rbar.classList.remove('on'); };
+
+let storageOK = true;
+const BASE = SEED.length;
+const KEY = 'ps-delta';
+
+async function save(){
+  try {
+    localStorage.setItem(KEY, JSON.stringify(msgs.slice(BASE)));
+    if (!storageOK) { storageOK = true; hint.textContent = 'toque numa mensagem deles pra responder ela'; }
+  } catch(e){
+    storageOK = false;
+    hint.textContent = 'não salvou — use "exportar" antes de fechar';
+  }
+}
+
+async function load(){
+  msgs = SEED.slice();
+  try {
+    const raw = localStorage.getItem(KEY);
+    const d = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(d) && d.length) msgs = SEED.concat(d);
+  } catch(e){}
+  render();
+}
+
+function transcript() {
+  const rel = msgs.filter(m => m.k === 'msg' || m.k === 'poem');
+  const recent = rel.slice(-45);
+  return recent.map(m => {
+    if (m.k === 'poem') {
+      const head = m.text.split('\n').slice(0,3).join(' / ');
+      return `[bel enviou o poema "${m.lbl}" — começa: ${head}…]`;
+    }
+    const pre = m.reply ? `[respondendo ${m.reply.who}: "${m.reply.text.slice(0,70)}"]\n` : '';
+    return `${m.who === 'me' ? 'bel' : NAMES[m.who]}: ${pre}${m.text.slice(0,700)}`;
+  }).join('\n');
+}
+
+function pendingCount() {
+  let n = 0;
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].k !== 'msg' && msgs[i].k !== 'poem') continue;
+    if (msgs[i].k === 'poem' || msgs[i].who === 'me') n++; else break;
+  }
+  return n;
+}
+
+function scheduleReply() {
+  clearTimeout(idleTimer);
+  const n = pendingCount();
+  if (!n) return;
+  hint.textContent = `${n} ${n>1?'mensagens':'mensagem'} — eles vão responder em instantes`;
+  idleTimer = setTimeout(runReply, 5000);
+}
+
+async function askModel() {
+  const res = await fetch("/api/chat", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ system: SYSTEM, transcript: transcript() })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || data.error || ('HTTP ' + res.status));
+  if (!data.content) throw new Error('sem conteúdo (HTTP ' + res.status + ')');
+
+  let raw = data.content.filter(c=>c.type==='text').map(c=>c.text).join('')
+    .replace(/```json/gi,'').replace(/```/g,'').trim();
+
+  let out = null;
+  try { out = JSON.parse(raw); } catch(e){}
+  if (!Array.isArray(out)) {
+    const m = raw.match(/\[[\s\S]*\]/);
+    if (m) { try { out = JSON.parse(m[0]); } catch(e){} }
+  }
+  if (!Array.isArray(out)) {
+    out = [];
+    const re = /\{[^{}]*"who"\s*:\s*"(griffin|oliver|kai|archer)"[^{}]*\}/g;
+    let hit;
+    while ((hit = re.exec(raw))) { try { out.push(JSON.parse(hit[0])); } catch(e){} }
+  }
+  out = (out||[]).filter(o => o && NAMES[o.who] && o.text);
+  if (!out.length) throw new Error('resposta ilegível');
+  return out;
+}
+
+async function runReply() {
+  if (busy || !pendingCount()) return;
+  clearTimeout(idleTimer);
+  busy = true; nudge.disabled = true;
+  msgs = msgs.filter(m => !(m.k === 'sys' && m.text.startsWith('falhou:')));
+
+  const first = Object.keys(PACE).sort((a,c)=>PACE[a].first-PACE[c].first)[0];
+  render(first);
+  hint.textContent = 'lendo…';
+
+  let out = null, lastErr = null;
+  for (let attempt = 0; attempt < 3 && !out; attempt++) {
+    try { out = await askModel(); }
+    catch (e) { lastErr = e; if (attempt < 2) await sleep(1200 * (attempt + 1)); }
+  }
+
+  if (out) {
+    const seen = new Set();
+    let prevWho = null;
+    for (const item of out) {
+      const pace = PACE[item.who];
+      const wait = (item.who === prevWho) ? pace.next : (seen.has(item.who) ? pace.next + 400 : pace.first);
+      render(item.who);
+      await sleep(wait);
+      let reply = null;
+      if (item.re) {
+        const key = String(item.re).toLowerCase().slice(0,25);
+        const hit = msgs.filter(m => m.k==='msg' && m.who==='me').reverse()
+          .find(m => m.text.toLowerCase().includes(key));
+        if (hit) reply = { who:'bel', text:hit.text };
+      }
+      msgs.push({ k:'msg', who:item.who, text:String(item.text), t:now(), reply });
+      seen.add(item.who); prevWho = item.who;
+      render();
+    }
+    await save();
+  } else {
+    msgs.push({ k:'sys', text:'falhou: ' + ((lastErr && lastErr.message) || lastErr) + ' — toque em "responder agora"' });
+    render();
+  }
+
+  busy = false; nudge.disabled = false;
+  hint.textContent = storageOK ? 'toque numa mensagem deles pra responder ela'
+                               : 'não está salvando neste ambiente — copie o que importar';
+}
+
+function send() {
+  const txt = input.value.trim();
+  if (!txt) { if (!busy) runReply(); return; }
+  msgs.push({ k:'msg', who:'me', text:txt, t:now(), reply:replyTo });
+  input.value=''; input.style.height='auto';
+  replyTo = null; rbar.classList.remove('on');
+  render(); save(); scheduleReply();
+}
+
+document.getElementById('send').onclick = send;
+nudge.onclick = () => { clearTimeout(idleTimer); runReply(); };
+input.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+input.addEventListener('input', () => {
+  input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px';
+  clearTimeout(idleTimer);
+  if (pendingCount()) idleTimer = setTimeout(runReply, 9000);
+});
+document.getElementById('export').onclick = async () => {
+  const txt = msgs.map(m => {
+    if (m.k === 'poem') return `\n[poema — ${m.lbl}]\n${m.text}\n`;
+    if (m.k === 'sys' || m.k === 'day') return `\n(${m.text})\n`;
+    const q = m.reply ? `  ↳ respondendo ${m.reply.who}: "${m.reply.text.slice(0,60)}…"\n` : '';
+    return `${m.who === 'me' ? 'bel' : NAMES[m.who]} [${m.t}]\n${q}${m.text}`;
+  }).join('\n');
+  try {
+    await navigator.clipboard.writeText(txt);
+    hint.textContent = 'conversa copiada — cole onde quiser guardar';
+  } catch(e) {
+    const w = window.open('', '_blank');
+    if (w) { w.document.write('<pre style="white-space:pre-wrap;font:14px system-ui;padding:16px">' +
+      txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>'); }
+    else hint.textContent = 'não deu pra copiar — selecione o texto na tela';
+  }
+};
+
+document.getElementById('reset').onclick = async () => {
+  clearTimeout(idleTimer); msgs = SEED.slice(); replyTo=null; rbar.classList.remove('on');
+  render();
+  try { localStorage.removeItem(KEY); } catch(e){}
+  hint.textContent='toque numa mensagem deles pra responder ela';
+};
+
+load();
+</script>
