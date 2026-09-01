@@ -80,8 +80,9 @@
   .bar { display:flex; align-items:center; gap:10px; margin-top:8px; }
   .hint { flex:1; font-size:11px; color:var(--dim); }
   .nudge { background:none; border:1px solid var(--line); color:var(--dim); border-radius:14px;
-           font:inherit; font-size:11px; padding:4px 10px; cursor:pointer; }
+           font:inherit; font-size:11px; padding:4px 10px; cursor:pointer; transition:.2s; }
   .nudge:disabled { opacity:.4; }
+  .nudge.ready { border-color:var(--archer); color:var(--archer); }
 </style>
 
 <div class="phone">
@@ -544,9 +545,9 @@ function pendingCount() {
 function scheduleReply() {
   clearTimeout(idleTimer);
   const n = pendingCount();
-  if (!n) return;
-  hint.textContent = `${n} ${n>1?'mensagens':'mensagem'} — eles vão responder em instantes`;
-  idleTimer = setTimeout(runReply, 5000);
+  if (!n) { nudge.classList.remove('ready'); return; }
+  hint.textContent = `${n} ${n>1?'mensagens':'mensagem'} esperando`;
+  nudge.classList.add('ready');
 }
 
 async function askModel() {
@@ -620,6 +621,7 @@ async function runReply() {
   }
 
   busy = false; nudge.disabled = false;
+  nudge.classList.remove('ready');
   hint.textContent = storageOK ? 'toque numa mensagem deles pra responder ela'
                                : 'não está salvando neste ambiente — copie o que importar';
 }
@@ -638,8 +640,6 @@ nudge.onclick = () => { clearTimeout(idleTimer); runReply(); };
 input.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
 input.addEventListener('input', () => {
   input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px';
-  clearTimeout(idleTimer);
-  if (pendingCount()) idleTimer = setTimeout(runReply, 9000);
 });
 document.getElementById('export').onclick = async () => {
   const txt = msgs.map(m => {
