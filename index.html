@@ -121,13 +121,14 @@
 
 <script>
 const NAMES = { griffin:'griffinnn', oliver:'oliverr', kai:'kaimercer', archer:'archerwlde' };
-// quanto cada um demora pra entrar na conversa, e o intervalo entre mensagens seguidas dele
+// atraso de cada um, em minutos, contados a partir da sua mensagem
 const PACE = {
-  griffin:{ first:700,  next:500  },
-  archer: { first:2200, next:1100 },
-  kai:    { first:3800, next:1500 },
-  oliver: { first:5200, next:1700 }
+  griffin:{ delay:2,  next:0.7 },
+  archer: { delay:6,  next:1.2 },
+  kai:    { delay:13, next:1.5 },
+  oliver: { delay:20, next:2.0 }
 };
+const MIN_DELAY = Math.min(...Object.values(PACE).map(p => p.delay));
 
 const P_LUKE = `eu queria ter pulado
 e sentir as ondas baterem em mim
@@ -449,7 +450,7 @@ SAÍDA: só um array JSON, sem cercas de markdown, sem comentário. De 2 a 7 men
 Use "re" quando a mensagem responder especificamente a uma mensagem anterior da Bel (como o reply do WhatsApp). Na maioria das vezes deixe null.
 Mensagens curtas, como gente digitando de verdade. Pensamento longo vira várias mensagens seguidas da mesma pessoa.`;
 
-let msgs = [], replyTo = null, busy = false, idleTimer = null;
+let msgs = [], replyTo = null, busy = false;
 
 const thread = document.getElementById('thread');
 const input  = document.getElementById('input');
@@ -499,10 +500,11 @@ document.getElementById('rb-x').onclick = () => { replyTo = null; rbar.classList
 let storageOK = true;
 const BASE = SEED.length;
 const KEY = 'ps-delta';
+let queue = [];
 
 async function save(){
   try {
-    localStorage.setItem(KEY, JSON.stringify(msgs.slice(BASE)));
+    localStorage.setItem(KEY, JSON.stringify({ delta: msgs.slice(BASE), queue }));
     if (!storageOK) { storageOK = true; hint.textContent = 'toque numa mensagem deles pra responder ela'; }
   } catch(e){
     storageOK = false;
@@ -511,13 +513,20 @@ async function save(){
 }
 
 async function load(){
-  msgs = SEED.slice();
+  msgs = SEED.slice(); queue = [];
   try {
     const raw = localStorage.getItem(KEY);
     const d = raw ? JSON.parse(raw) : null;
-    if (Array.isArray(d) && d.length) msgs = SEED.concat(d);
+    if (Array.isArray(d)) {                       // formato antigo
+      if (d.length) msgs = SEED.concat(d);
+    } else if (d && typeof d === 'object') {
+      if (Array.isArray(d.delta) && d.delta.length) msgs = SEED.concat(d.delta);
+      if (Array.isArray(d.queue)) queue = d.queue;
+    }
   } catch(e){}
   render();
+  flush();
+  if (!queue.length && pendingCount()) maybeGenerate();
 }
 
 function transcript() {
@@ -542,13 +551,53 @@ function pendingCount() {
   return n;
 }
 
-function scheduleReply() {
-  clearTimeout(idleTimer);
-  const n = pendingCount();
-  if (!n) { nudge.classList.remove('ready'); return; }
-  hint.textContent = `${n} ${n>1?'mensagens':'mensagem'} esperando`;
-  nudge.classList.add('ready');
+function lastMineTime() {
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].k === 'msg' && msgs[i].who === 'me') return msgs[i].ts || Date.now();
+  }
+  return Date.now();
 }
+
+function stamp(ts) {
+  return new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function updateHint() {
+  if (busy) return;
+  if (queue.length) {
+    const next = Math.min(...queue.map(q => q.dueAt));
+    const mins = Math.max(1, Math.round((next - Date.now())/60000));
+    hint.textContent = 'alguem responde em ~' + mins + ' min';
+    nudge.classList.add('ready');
+    return;
+  }
+  const n = pendingCount();
+  if (n) {
+    hint.textContent = n + (n>1 ? ' mensagens esperando' : ' mensagem esperando');
+    nudge.classList.add('ready');
+  } else {
+    hint.textContent = storageOK ? 'toque numa mensagem deles pra responder ela'
+                                 : 'nao salvou — use "exportar" antes de fechar';
+    nudge.classList.remove('ready');
+  }
+}
+
+function scheduleReply(){ updateHint(); }
+
+// solta da fila tudo que ja venceu, com o horario de quando teria chegado
+function flush() {
+  const agora = Date.now();
+  const due = queue.filter(q => q.dueAt <= agora).sort((a,b) => a.dueAt - b.dueAt);
+  if (due.length) {
+    queue = queue.filter(q => q.dueAt > agora);
+    for (const q of due) {
+      msgs.push({ k:'msg', who:q.who, text:q.text, t:stamp(q.dueAt), ts:q.dueAt, reply:q.reply });
+    }
+    render(); save();
+  }
+  updateHint();
+}
+setInterval(flush, 15000);
 
 async function askModel() {
   const res = await fetch("/api/chat", {
@@ -557,7 +606,7 @@ async function askModel() {
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message || data.error || ('HTTP ' + res.status));
-  if (!data.content) throw new Error('sem conteúdo (HTTP ' + res.status + ')');
+  if (!data.content) throw new Error('sem conteudo (HTTP ' + res.status + ')');
 
   let raw = data.content.filter(c=>c.type==='text').map(c=>c.text).join('')
     .replace(/```json/gi,'').replace(/```/g,'').trim();
@@ -575,34 +624,41 @@ async function askModel() {
     while ((hit = re.exec(raw))) { try { out.push(JSON.parse(hit[0])); } catch(e){} }
   }
   out = (out||[]).filter(o => o && NAMES[o.who] && o.text);
-  if (!out.length) throw new Error('resposta ilegível');
+  if (!out.length) throw new Error('resposta ilegivel');
   return out;
 }
 
-async function runReply() {
+// gera as respostas e monta a fila. agora=true ignora a espera
+async function generate(agora) {
   if (busy || !pendingCount()) return;
-  clearTimeout(idleTimer);
   busy = true; nudge.disabled = true;
   msgs = msgs.filter(m => !(m.k === 'sys' && m.text.startsWith('falhou:')));
-
-  const first = Object.keys(PACE).sort((a,c)=>PACE[a].first-PACE[c].first)[0];
-  render(first);
-  hint.textContent = 'lendo…';
+  hint.textContent = 'lendo...';
+  render();
 
   let out = null, lastErr = null;
-  for (let attempt = 0; attempt < 3 && !out; attempt++) {
+  for (let a = 0; a < 3 && !out; a++) {
     try { out = await askModel(); }
-    catch (e) { lastErr = e; if (attempt < 2) await sleep(1200 * (attempt + 1)); }
+    catch (e) { lastErr = e; if (a < 2) await sleep(1200 * (a + 1)); }
   }
 
   if (out) {
-    const seen = new Set();
-    let prevWho = null;
+    const from = lastMineTime();
+    const seen = {};
+    let prevWho = null, prevAt = 0;
+    queue = [];
     for (const item of out) {
-      const pace = PACE[item.who];
-      const wait = (item.who === prevWho) ? pace.next : (seen.has(item.who) ? pace.next + 400 : pace.first);
-      render(item.who);
-      await sleep(wait);
+      const p = PACE[item.who];
+      let at;
+      if (agora) {
+        at = Date.now() + (prevAt ? (prevAt - Date.now()) + 1100 : 400);
+      } else if (item.who === prevWho) {
+        at = prevAt + p.next * 60000 * (0.7 + Math.random()*0.6);
+      } else if (seen[item.who]) {
+        at = Math.max(prevAt + 30000, seen[item.who] + p.next * 120000);
+      } else {
+        at = from + p.delay * 60000 * (0.75 + Math.random()*0.5);
+      }
       let reply = null;
       if (item.re) {
         const key = String(item.re).toLowerCase().slice(0,25);
@@ -610,33 +666,59 @@ async function runReply() {
           .find(m => m.text.toLowerCase().includes(key));
         if (hit) reply = { who:'bel', text:hit.text };
       }
-      msgs.push({ k:'msg', who:item.who, text:String(item.text), t:now(), reply });
-      seen.add(item.who); prevWho = item.who;
-      render();
+      queue.push({ who:item.who, text:String(item.text), dueAt:Math.round(at), reply });
+      seen[item.who] = at; prevWho = item.who; prevAt = at;
     }
-    await save();
+    save();
   } else {
     msgs.push({ k:'sys', text:'falhou: ' + ((lastErr && lastErr.message) || lastErr) + ' — toque em "responder agora"' });
     render();
   }
 
   busy = false; nudge.disabled = false;
-  nudge.classList.remove('ready');
-  hint.textContent = storageOK ? 'toque numa mensagem deles pra responder ela'
-                               : 'não está salvando neste ambiente — copie o que importar';
+  flush();
+  if (agora) drain();
+}
+
+// solta a fila rapidinho, usado pelo botao "responder agora"
+function drain() {
+  let i = 0;
+  const t = setInterval(() => {
+    flush();
+    if (!queue.length || ++i > 20) clearInterval(t);
+  }, 500);
+}
+
+// ao abrir o app: so gera se ja passou tempo suficiente
+function maybeGenerate() {
+  if (Date.now() - lastMineTime() >= MIN_DELAY * 60000) generate(false);
+  else updateHint();
+}
+
+function runReply() {
+  if (queue.length) {
+    const agora = Date.now();
+    queue = queue.map((q,i) => ({ ...q, dueAt: agora + i*1100 }));
+    save();
+    flush();
+    drain();
+  } else {
+    generate(true);
+  }
 }
 
 function send() {
   const txt = input.value.trim();
   if (!txt) { if (!busy) runReply(); return; }
-  msgs.push({ k:'msg', who:'me', text:txt, t:now(), reply:replyTo });
+  const ts = Date.now();
+  msgs.push({ k:'msg', who:'me', text:txt, t:stamp(ts), ts, reply:replyTo });
   input.value=''; input.style.height='auto';
   replyTo = null; rbar.classList.remove('on');
-  render(); save(); scheduleReply();
+  render(); save(); updateHint();
 }
 
 document.getElementById('send').onclick = send;
-nudge.onclick = () => { clearTimeout(idleTimer); runReply(); };
+nudge.onclick = () => runReply();
 input.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
 input.addEventListener('input', () => {
   input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px';
@@ -660,11 +742,18 @@ document.getElementById('export').onclick = async () => {
 };
 
 document.getElementById('reset').onclick = async () => {
-  clearTimeout(idleTimer); msgs = SEED.slice(); replyTo=null; rbar.classList.remove('on');
+  msgs = SEED.slice(); queue = []; replyTo=null; rbar.classList.remove('on');
   render();
   try { localStorage.removeItem(KEY); } catch(e){}
-  hint.textContent='toque numa mensagem deles pra responder ela';
+  updateHint();
 };
+
+// ao voltar pro app, checa se chegou mensagem
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  flush();
+  if (!queue.length && pendingCount()) maybeGenerate();
+});
 
 load();
 </script>
