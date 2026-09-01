@@ -18,17 +18,20 @@
     font-size:15px;line-height:1.45;display:flex;justify-content:center}
   .phone{width:100%;max-width:480px;height:100dvh;background:var(--ink);display:flex;flex-direction:column;overflow:hidden}
 
-  header{background:var(--rail);border-bottom:1px solid var(--line);padding:11px 14px;
-    display:flex;align-items:center;gap:11px;flex:none;min-height:58px}
-  .back{background:none;border:0;color:var(--text);font-size:24px;line-height:1;padding:0 2px 0 0;cursor:pointer}
+  header{background:var(--rail);border-bottom:1px solid var(--line);
+    padding:11px 14px;padding-top:calc(11px + env(safe-area-inset-top,0px));
+    display:flex;align-items:center;gap:11px;flex:none;
+    min-height:calc(58px + env(safe-area-inset-top,0px))}
   .ava{width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;
     justify-content:center;font-weight:600;font-size:13px;color:#12161c}
   .hd{flex:1;min-width:0}
   .hd h1{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:17px;margin:0;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hd .sub{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tool{background:none;border:1px solid var(--line);color:var(--dim);border-radius:14px;
-    font:inherit;font-size:11px;padding:4px 9px;cursor:pointer;flex:none}
+  .tool{background:none;border:1px solid var(--line);color:var(--dim);border-radius:15px;
+    font:inherit;font-size:11px;padding:8px 12px;cursor:pointer;flex:none}
+  .back{background:none;border:0;color:var(--text);font-size:26px;line-height:1;
+    padding:6px 10px 6px 0;cursor:pointer}
 
   .list{flex:1;overflow-y:auto}
   .item{display:flex;gap:12px;align-items:center;padding:13px 15px;border-bottom:1px solid var(--line);cursor:pointer}
@@ -64,7 +67,8 @@
     font-size:15px;line-height:1.6;white-space:pre-line;color:#cfd6df}
   .poem .lbl{display:block;font-family:Inter,sans-serif;font-size:10.5px;color:var(--dim);margin-bottom:7px}
 
-  .composer{flex:none;background:var(--rail);border-top:1px solid var(--line);padding:9px 12px 11px}
+  .composer{flex:none;background:var(--rail);border-top:1px solid var(--line);
+    padding:9px 12px 11px;padding-bottom:calc(11px + env(safe-area-inset-bottom,0px))}
   .replybar{display:none;align-items:flex-start;gap:8px;background:rgba(255,255,255,.06);
     border-left:3px solid var(--griffin);border-radius:6px;padding:6px 8px;margin-bottom:8px;font-size:13px}
   .replybar.on{display:flex}
