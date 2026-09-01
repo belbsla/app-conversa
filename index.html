@@ -8,129 +8,135 @@
 <title>the poem situation</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400&display=swap');
-
-  :root {
-    --ink:#0e1116; --rail:#1c222b; --line:#262d38; --text:#dfe3e9; --dim:#7f8a99;
-    --mine:#2f4a3f; --mine-text:#e8f2ec; --theirs:#1e242e; --poem:#131820;
-    --griffin:#e0a458; --oliver:#7fb3d5; --kai:#a894cc; --archer:#7cbf9a;
-  }
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { height:100%; }
-  body { margin:0; background:#05070a; color:var(--text);
+  :root{--ink:#0e1116;--rail:#1c222b;--line:#262d38;--text:#dfe3e9;--dim:#7f8a99;
+    --mine:#2f4a3f;--mine-text:#e8f2ec;--theirs:#1e242e;--poem:#131820;
+    --griffin:#e0a458;--oliver:#7fb3d5;--kai:#a894cc;--archer:#7cbf9a;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{margin:0;background:#05070a;color:var(--text);
     font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    font-size:15px; line-height:1.45; display:flex; justify-content:center; }
-  .phone { width:100%; max-width:480px; height:100dvh; background:var(--ink); display:flex; flex-direction:column; }
+    font-size:15px;line-height:1.45;display:flex;justify-content:center}
+  .phone{width:100%;max-width:480px;height:100dvh;background:var(--ink);display:flex;flex-direction:column;overflow:hidden}
 
-  header { background:var(--rail); border-bottom:1px solid var(--line);
-    padding:11px 14px; display:flex; align-items:center; gap:11px; flex:none; }
-  .avatars { display:flex; }
-  .av { width:25px; height:25px; border-radius:50%; border:2px solid var(--rail); margin-left:-9px;
-        font-size:10.5px; display:flex; align-items:center; justify-content:center; font-weight:600; color:#12161c; }
-  .av:first-child { margin-left:0; }
-  .hd h1 { font-family:Newsreader,Georgia,serif; font-weight:400; font-size:17px; margin:0; }
-  .hd .sub { font-size:11px; color:var(--dim); }
-  .reset { margin-left:auto; background:none; border:1px solid var(--line); color:var(--dim);
-           border-radius:14px; font:inherit; font-size:11px; padding:4px 9px; cursor:pointer; }
+  header{background:var(--rail);border-bottom:1px solid var(--line);padding:11px 14px;
+    display:flex;align-items:center;gap:11px;flex:none;min-height:58px}
+  .back{background:none;border:0;color:var(--text);font-size:24px;line-height:1;padding:0 2px 0 0;cursor:pointer}
+  .ava{width:34px;height:34px;border-radius:50%;flex:none;display:flex;align-items:center;
+    justify-content:center;font-weight:600;font-size:13px;color:#12161c}
+  .hd{flex:1;min-width:0}
+  .hd h1{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:17px;margin:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hd .sub{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tool{background:none;border:1px solid var(--line);color:var(--dim);border-radius:14px;
+    font:inherit;font-size:11px;padding:4px 9px;cursor:pointer;flex:none}
 
-  .thread { flex:1; overflow-y:auto; padding:16px 12px 8px; }
-  .sys { text-align:center; color:var(--dim); font-size:12px; font-style:italic; margin:16px auto; max-width:84%; }
-  .day { text-align:center; margin:20px 0 14px; }
-  .day span { background:var(--rail); color:var(--dim); font-size:11.5px; padding:4px 12px; border-radius:20px; }
+  .list{flex:1;overflow-y:auto}
+  .item{display:flex;gap:12px;align-items:center;padding:13px 15px;border-bottom:1px solid var(--line);cursor:pointer}
+  .item .txt{flex:1;min-width:0}
+  .item .nm{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:7px}
+  .item .pv{color:var(--dim);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--archer);flex:none}
+  .stack{display:flex;flex:none}
+  .stack .ava{margin-left:-14px;border:2px solid var(--ink);font-size:11px;width:32px;height:32px}
+  .stack .ava:first-child{margin-left:0}
 
-  .msg { display:flex; margin-bottom:3px; }
-  .msg.gap { margin-top:12px; }
-  .msg.me { justify-content:flex-end; }
-  .bubble { max-width:80%; background:var(--theirs); padding:8px 11px 6px; border-radius:14px;
-            word-wrap:break-word; cursor:pointer; }
-  .msg.me .bubble { background:var(--mine); color:var(--mine-text); cursor:default; }
-  .msg.gap:not(.me) .bubble { border-top-left-radius:4px; }
-  .msg.gap.me .bubble { border-top-right-radius:4px; }
-  .who { display:block; font-size:12.5px; font-weight:600; margin-bottom:2px; }
-  .who.griffin{color:var(--griffin)} .who.oliver{color:var(--oliver)}
-  .who.kai{color:var(--kai)} .who.archer{color:var(--archer)}
-  .time { float:right; font-size:10.5px; color:var(--dim); margin:6px 0 0 10px; position:relative; top:3px; }
-  .msg.me .time { color:#9dbdae; }
+  .thread{flex:1;overflow-y:auto;padding:16px 12px 8px}
+  .sys{text-align:center;color:var(--dim);font-size:12px;font-style:italic;margin:16px auto;max-width:84%}
+  .day{text-align:center;margin:20px 0 14px}
+  .day span{background:var(--rail);color:var(--dim);font-size:11.5px;padding:4px 12px;border-radius:20px}
+  .msg{display:flex;margin-bottom:3px}
+  .msg.gap{margin-top:12px}
+  .msg.me{justify-content:flex-end}
+  .bubble{max-width:80%;background:var(--theirs);padding:8px 11px 6px;border-radius:14px;word-wrap:break-word;cursor:pointer}
+  .msg.me .bubble{background:var(--mine);color:var(--mine-text);cursor:default}
+  .msg.gap:not(.me) .bubble{border-top-left-radius:4px}
+  .msg.gap.me .bubble{border-top-right-radius:4px}
+  .who{display:block;font-size:12.5px;font-weight:600;margin-bottom:2px}
+  .who.griffin{color:var(--griffin)}.who.oliver{color:var(--oliver)}
+  .who.kai{color:var(--kai)}.who.archer{color:var(--archer)}
+  .time{float:right;font-size:10.5px;color:var(--dim);margin:6px 0 0 10px;position:relative;top:3px}
+  .msg.me .time{color:#9dbdae}
+  .quoted{border-left:3px solid var(--dim);background:rgba(255,255,255,.06);border-radius:6px;
+    padding:5px 8px;margin-bottom:6px;font-size:13px;color:var(--dim)}
+  .quoted b{display:block;font-size:11.5px;font-weight:600;margin-bottom:1px;color:#a8b3c1}
+  .poem{max-width:88%;background:var(--poem);border:1px solid var(--line);border-left:2px solid var(--griffin);
+    border-radius:10px;padding:13px 15px;margin:6px 0 4px auto;font-family:Newsreader,Georgia,serif;
+    font-size:15px;line-height:1.6;white-space:pre-line;color:#cfd6df}
+  .poem .lbl{display:block;font-family:Inter,sans-serif;font-size:10.5px;color:var(--dim);margin-bottom:7px}
 
-  .quoted { border-left:3px solid var(--dim); background:rgba(255,255,255,.06); border-radius:6px;
-            padding:5px 8px; margin-bottom:6px; font-size:13px; color:var(--dim); }
-  .quoted b { display:block; font-size:11.5px; font-weight:600; margin-bottom:1px; color:#a8b3c1; }
+  .composer{flex:none;background:var(--rail);border-top:1px solid var(--line);padding:9px 12px 11px}
+  .replybar{display:none;align-items:flex-start;gap:8px;background:rgba(255,255,255,.06);
+    border-left:3px solid var(--griffin);border-radius:6px;padding:6px 8px;margin-bottom:8px;font-size:13px}
+  .replybar.on{display:flex}
+  .replybar div{flex:1;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .replybar b{color:var(--text);font-size:11.5px;display:block}
+  .replybar button{background:none;border:0;color:var(--dim);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
+  .row{display:flex;gap:7px;align-items:flex-end}
+  .clip{flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
+    background:none;color:var(--dim);font-size:15px;cursor:pointer}
+  textarea{flex:1;background:var(--ink);border:1px solid var(--line);border-radius:18px;
+    color:var(--text);font:inherit;padding:9px 13px;resize:none;max-height:120px;min-height:38px}
+  textarea:focus{outline:none;border-color:var(--archer)}
+  .send{flex:none;width:38px;height:38px;border-radius:50%;border:0;background:var(--mine);
+    color:var(--mine-text);font-size:16px;cursor:pointer}
+  .send:disabled{opacity:.4}
+  .bar{display:flex;align-items:center;gap:10px;margin-top:8px}
+  .hint{flex:1;font-size:11px;color:var(--dim)}
+  .nudge{background:none;border:1px solid var(--line);color:var(--dim);border-radius:14px;
+    font:inherit;font-size:11px;padding:4px 10px;cursor:pointer;transition:.2s}
+  .nudge:disabled{opacity:.4}
+  .nudge.ready{border-color:var(--archer);color:var(--archer)}
 
-  .poem { max-width:88%; background:var(--poem); border:1px solid var(--line); border-left:2px solid var(--griffin);
-          border-radius:10px; padding:13px 15px; margin:6px 0 4px auto;
-          font-family:Newsreader,Georgia,serif; font-size:15px; line-height:1.6; white-space:pre-line; color:#cfd6df; }
-  .poem .lbl { display:block; font-family:Inter,sans-serif; font-size:10.5px; color:var(--dim); margin-bottom:7px; }
-
-  .typing { color:var(--dim); font-size:12.5px; padding:6px 6px 10px; font-style:italic; }
-
-  .composer { flex:none; background:var(--rail); border-top:1px solid var(--line); padding:9px 12px 11px; }
-  .replybar { display:none; align-items:flex-start; gap:8px; background:rgba(255,255,255,.06);
-              border-left:3px solid var(--griffin); border-radius:6px; padding:6px 8px; margin-bottom:8px; font-size:13px; }
-  .replybar.on { display:flex; }
-  .replybar div { flex:1; color:var(--dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .replybar b { color:var(--text); font-size:11.5px; display:block; }
-  .replybar button { background:none; border:0; color:var(--dim); font-size:18px; line-height:1; cursor:pointer; padding:0 4px; }
-
-  .row { display:flex; gap:8px; align-items:flex-end; }
-  textarea { flex:1; background:var(--ink); border:1px solid var(--line); border-radius:18px;
-    color:var(--text); font:inherit; padding:9px 13px; resize:none; max-height:120px; min-height:38px; }
-  textarea:focus { outline:none; border-color:var(--archer); }
-  .send { flex:none; width:38px; height:38px; border-radius:50%; border:0; background:var(--mine);
-          color:var(--mine-text); font-size:16px; cursor:pointer; }
-  .send:disabled { opacity:.4; cursor:default; }
-  .bar { display:flex; align-items:center; gap:10px; margin-top:8px; }
-  .hint { flex:1; font-size:11px; color:var(--dim); }
-  .nudge { background:none; border:1px solid var(--line); color:var(--dim); border-radius:14px;
-           font:inherit; font-size:11px; padding:4px 10px; cursor:pointer; transition:.2s; }
-  .nudge:disabled { opacity:.4; }
-  .nudge.ready { border-color:var(--archer); color:var(--archer); }
+  .sheet{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-end;justify-content:center;z-index:50}
+  .sheet.on{display:flex}
+  .sheet .box{width:100%;max-width:480px;background:var(--rail);border-radius:16px 16px 0 0;padding:16px 14px 26px;
+    max-height:80vh;overflow-y:auto}
+  .sheet h2{font-family:Newsreader,serif;font-weight:400;font-size:16px;margin:0 0 12px}
+  .sheet button.p{display:block;width:100%;text-align:left;background:var(--ink);border:1px solid var(--line);
+    color:var(--text);border-radius:10px;padding:11px 13px;margin-bottom:8px;font:inherit;font-size:14px;cursor:pointer}
+  .sheet button.p small{display:block;color:var(--dim);font-size:11.5px;margin-top:3px}
+  .sheet .cancel{width:100%;background:none;border:0;color:var(--dim);font:inherit;font-size:13px;padding:10px;cursor:pointer}
 </style>
 
 <div class="phone">
-  <header>
-    <div class="avatars">
-      <div class="av" style="background:var(--griffin)">G</div>
-      <div class="av" style="background:var(--oliver)">O</div>
-      <div class="av" style="background:var(--kai)">K</div>
-      <div class="av" style="background:var(--archer)">A</div>
-    </div>
-    <div class="hd">
-      <h1>the poem situation</h1>
-      <div class="sub">você, Griffin, Oliver, Kai, Archer</div>
-    </div>
-    <button class="reset" id="export">exportar</button>
-    <button class="reset" id="reset" style="margin-left:6px">recomeçar</button>
-  </header>
-
-  <div class="thread" id="thread"></div>
-
-  <div class="composer">
+  <header id="head"></header>
+  <div class="list" id="list"></div>
+  <div class="thread" id="thread" hidden></div>
+  <div class="composer" id="composer" hidden>
     <div class="replybar" id="replybar">
       <div><b id="rb-who"></b><span id="rb-text"></span></div>
-      <button id="rb-x" aria-label="cancelar resposta">&times;</button>
+      <button id="rb-x" aria-label="cancelar">&times;</button>
     </div>
     <div class="row">
+      <button class="clip" id="clip" aria-label="anexar poema">&#9998;</button>
       <textarea id="input" rows="1" placeholder="mensagem"></textarea>
-      <button class="send" id="send" aria-label="enviar">↑</button>
+      <button class="send" id="send" aria-label="enviar">&#8593;</button>
     </div>
     <div class="bar">
-      <span class="hint" id="hint">toque numa mensagem deles pra responder ela</span>
+      <span class="hint" id="hint"></span>
       <button class="nudge" id="nudge">responder agora</button>
     </div>
   </div>
 </div>
 
-<script>
-const NAMES = { griffin:'griffinnn', oliver:'oliverr', kai:'kaimercer', archer:'archerwlde' };
-// atraso de cada um, em minutos, contados a partir da sua mensagem
-const PACE = {
-  griffin:{ delay:2,  next:0.7 },
-  archer: { delay:6,  next:1.2 },
-  kai:    { delay:13, next:1.5 },
-  oliver: { delay:20, next:2.0 }
-};
-const MIN_DELAY = Math.min(...Object.values(PACE).map(p => p.delay));
+<div class="sheet" id="sheet"><div class="box">
+  <h2>enviar um poema</h2>
+  <div id="poemlist"></div>
+  <button class="cancel" id="sheet-x">cancelar</button>
+</div></div>
 
-const P_LUKE = `eu queria ter pulado
+<script>
+const WHO = {
+  griffin:{ handle:'griffinnn',  nome:'Griffin', cor:'var(--griffin)', ini:'G', delay:2,  next:0.7 },
+  oliver: { handle:'oliverr',    nome:'Oliver',  cor:'var(--oliver)',  ini:'O', delay:20, next:2.0 },
+  kai:    { handle:'kaimercer',  nome:'Kai',     cor:'var(--kai)',     ini:'K', delay:13, next:1.5 },
+  archer: { handle:'archerwlde', nome:'Archer',  cor:'var(--archer)',  ini:'A', delay:6,  next:1.2 }
+};
+const MIN_DELAY = 2;
+
+const POEMAS = {
+  pulado:{ titulo:'eu queria ter pulado', texto:
+`eu queria ter pulado
 e sentir as ondas baterem em mim
 queria sentir a correnteza me puxando
 e a força da maré me jogando contra as pedras
@@ -157,9 +163,9 @@ eu iria
 nem que fosse por um instante
 me sentir,
 finalmente,
-viva`;
-
-const P_MIKE = `se a vida fosse um trem
+viva` },
+  trem:{ titulo:'se a vida fosse um trem', texto:
+`se a vida fosse um trem
 eu me perderia nas estações
 eu vagaria entre os vagões
 eu sentaria e ouviria as mais belas
@@ -192,9 +198,9 @@ e de alguém me esperando com um bolo
 um abraço
 e um
 "espero que a viagem tenha sido boa,
-mas bem vinda de volta ao lar"`;
-
-const P_CAL = `dessa vez
+mas bem vinda de volta ao lar"` },
+  porta:{ titulo:'dessa vez fechamos a porta?', texto:
+`dessa vez
 fechamos a porta?
 viramos e fomos embora?
 queimamos o livro?
@@ -236,9 +242,9 @@ se eu
 de fato
 tivesse morrido
 quantas rosas morreriam
-antes de você jogá-las no meu caixão?`;
-
-const P_ASH = `eu fui dilacerada
+antes de você jogá-las no meu caixão?` },
+  tornado:{ titulo:'eu fui dilacerada', texto:
+`eu fui dilacerada
 rasgada
 jogada
 despedaçada
@@ -317,9 +323,9 @@ bato a areia dos meus braços
 e te estendo a mão
 e ofereço um sorriso
 porque
-apesar de`;
-
-const P_REAL = `a realidade é muito real
+apesar de` },
+  realidade:{ titulo:'a realidade é muito real', texto:
+`a realidade é muito real
 me entende?
 eu não posso me deitar e fingir que estou no espaço
 porque estou presa
@@ -340,420 +346,443 @@ a realidade é muito crua
 é por isso que quando ela entra na sala
 eu apago as luzes
 e me sento imóvel no canto mais improvável
-quem sabe ela passa e esquece de me levar`;
+quem sabe ela passa e esquece de me levar` }
+};
 
-const g=(w,t,tm)=>({k:'msg',who:w,text:t,t:tm});
-const b=(t,tm)=>({k:'msg',who:'me',text:t,t:tm});
-const s=t=>({k:'sys',text:t});
-const pm=(l,t)=>({k:'poem',lbl:l,text:t});
+const BASE = `Você escreve os personagens de uma ficção colaborativa em formato de mensagens. Bel é uma poeta brasileira de 25 anos, de Amparo (SP), que vende impressão 3D pela internet, mora com os pais e faz terapia. Bel escreve as mensagens dela; você escreve SOMENTE os outros.
 
-const SEED = [
-  s('Griffin adicionou você a um grupo.'),
-  s('Griffin nomeou o grupo "the poem situation".'),
-  {k:'day',text:'segunda-feira'},
-  g('griffin',"right. everyone. this is bel. she wrote the poems",'00:01'),
-  g('griffin',"she's been listening for 13 years, she picked which poem went to which of us on purpose, and she's just told me what jet black heart is about and i think luke needs to sit down",'00:01'),
-  g('griffin',"i'm going to bed. good luck bel",'00:02'),
-  s('Griffin saiu do grupo.'),
-  g('oliver',"he did NOT just do that",'00:02'),
-  g('archer',"he did",'00:03'),
-  g('archer',"hi bel",'00:03'),
-  b("hey guys, everyone ok? and someone put him back in the group for god's sakes",'00:05'),
-  s('Archer adicionou Griffin ao grupo.'),
-  g('griffin',"NO. i had an exit. that was a good exit",'00:06'),
-  g('archer',"bel asked. you don't get an exit",'00:06'),
-  g('oliver',"hi bel. sorry about him. \"everyone ok\" is a very generous opening for someone who's just been added to a group chat against her will at 2am",'00:07'),
-  g('kai',"hi. griffin's message says you picked which poem went to which of us. is that true",'00:08'),
-  g('archer',"bel — hi, properly. i've had yours in my bag since são paulo. i've been meaning to say something and haven't, so griffin's dragged me into it, which is probably fair",'00:09'),
-  g('oliver',"what did you tell him about jet black heart. he sent me a screenshot with no context and the word \"MATE\" underneath it",'00:10'),
-  b("ok, i'm responding in order:\nmike: that was dramatic and i'm the only one who gets to be dramatic dude, i'm the one in a group chat with my favourite band, thank you\ncalum: hey, yes that's true.\nash: hello, i hope you liked the poem, it's very long i know, but it's good, i'm very proud of that one.\nluke: HE ASKED ME",'00:14'),
-  g('griffin',"also you used our real names. that's the first time anyone's done that in this chat, we're normally just surnames and abuse",'00:15'),
-  g('oliver',"i wrote that line when i was nineteen and i've never thought about it once since. it's just a shape my mouth makes now",'00:20'),
-  g('oliver',"and you're right. that's the annoying part. you're right and i can't argue with it",'00:20'),
-  g('archer',"bel — yes, i liked it. \"liked\" is the wrong word but we'll come back to that",'00:22'),
-  g('archer',"and you said you're proud of it, which i want to flag, because that's not a normal thing for someone to say about their own work and people who say it are usually right",'00:22'),
-  g('kai',"so what did you pick mine for",'00:24'),
-  b("\"it's just a shape my mouth makes now\" KKKKKKKKKKKK sorry that was funny cause i cried when mike sang it AND I'LL CRY EVERY TIME THANK YOU\n\"liked is the wrong word\" — if you hated it just say it, i can handle it\nCal, i picked yours cause in your album you talk about being the one who hurt someone else, that's the opposite of what i gave you",'00:29'),
-  g('archer',"bel NO. i didn't hate it. it's not a thing you like, it's a thing that sits on your chest for a bit",'00:30'),
-  g('archer',"i've read it more than anything else i've read this year. please keep listening to the songs",'00:31'),
-  g('kai',"you've handed me the other side of my own record",'00:35'),
-  g('kai',"did you write it to someone specific",'00:50'),
-  b("yes and no, it was for someone and then it was about a pattern that people who come into my life do",'00:56'),
-  g('kai',"one person would be angrier and more specific. this one's tired",'01:01'),
-  g('kai',"i'm sorry. not for me, i've never met you. but somebody should have said it by now and apparently nobody has",'01:03'),
-  g('oliver',"griffin said you'd been writing for thirteen years. where do they go? can we read them?",'01:04'),
-  b("in a folder, in notebooks. nobody's read any of them. if you want to, yes you can",'01:11'),
-  g('archer',"were those four translated? you're brazilian. i've just assumed you write in english because that's what we got",'01:17'),
-  b("of course they were translated. why the hell would i give a poem written in portuguese? i have about 3 or 4 poems in english and they are not good",'01:24'),
-  g('griffin',"so the four you gave us aren't the english ones. bel we've been reading the second-best version",'01:26'),
-  g('kai',"mine's got a word in it that isn't really english. \"lap\" doesn't sit right. what's the portuguese",'01:28'),
-  b("colo. it's what a mother, or someone who loves you, gives you when you're not fine. a safe place where you can be carried and just break",'01:39'),
-  g('kai',"english hasn't got that. we've got \"comfort\" which is polite and \"lap\" which is furniture. and we got lap. christ",'01:41'),
-  g('griffin',"send us the portuguese ones",'01:45'),
-  g('oliver',"yes",'01:45'),
-  g('archer',"yes",'01:45'),
-  g('kai',"yes",'01:46'),
-  b("WHY DON'T I GET TO VOTE?????????? okay, give me a minute",'01:51'),
-  g('griffin',"you don't get to vote because it's about your poems and you'd vote no",'01:52'),
-  pm('para o Luke', P_LUKE),
-  pm('para o Mike', P_MIKE),
-  pm('para o Cal', P_CAL),
-  pm('para o Ash', P_ASH),
-  g('oliver',"\"crua e nua\" — those rhyme. the english doesn't. i've got \"raw and naked\" which is just two words",'02:15'),
-  g('griffin',"mine reads like a train in portuguese. it does not read like a train in english. that's not a translation loss, that's the entire poem",'02:19'),
-  g('archer',"\"apesar de\" isn't an ending. it's a sentence that's been cut with the knife still in it",'02:23'),
-  g('archer',"the poem doesn't end in english. it CAN'T. we've been reading a version where the whole point doesn't work",'02:23'),
-  g('oliver',"why us and not someone who actually speaks portuguese",'02:28'),
-  b("because in portuguese is where all of this lives, and it cuts deeper, and someone would have asked me if i was okay, or who hurt me, and i can not take it. in portuguese it's me, the raw and broken side. in english it's just a deep and good poem",'02:35'),
-  g('oliver',"the english version is a poem. the portuguese version is you",'02:36'),
-  g('archer',"none of us asked that. griffin asked about a cake. kai asked about a word. oliver asked about the ending",'02:38'),
-  g('archer',"we asked about the writing. because that's what you gave us",'02:39'),
-  g('archer',"send us one that you've never translated. i want to read one that was never meant for anyone to read",'02:45'),
-  pm('nunca traduzido', P_REAL),
-  b("not a very good one btw",'02:53'),
-  g('archer',"she's sat in a dark room in the corner hoping reality walks past and forgets her. bel that's a child hiding from someone who's come into the house",'03:00'),
-  g('oliver',"it doesn't say \"i want to die\". it says i turn the lights off and sit still in the most unlikely corner. that's not despair, that's a strategy",'03:04'),
-  g('archer',"that's the first one you've sent that's only about you and you flagged it as the weak one",'03:07'),
-  g('griffin',"how many of these are there. ballpark. how big is the folder, bel",'03:09'),
-  b("i'm not asking anyone actually, i'm just there talking to myself.\ni have a lot of poems, most of them are in notebooks, maybe 30 of them are on my phone.",'03:14'),
-];
+CONTEXTO. Bel escreve poesia há 13 anos e nunca mostrou a ninguém. Acompanha essa banda australiana há 13 anos. Num Q&A VIP em São Paulo ela perguntou: "You give a lot, all the time, to a lot of people. Does anything ever come back that wasn't made FOR you — something that existed before you did?" Depois entregou a cada um um card impresso com um poema: "They're not about you, or the songs. They already existed." E: "By the way, you're going to read them and get them wrong." Ela escolheu qual poema ia pra quem, de propósito, com base nos discos solo deles. Escreve em português; os quatro que eles receberam eram traduções dela, e ela acha as versões em português muito melhores. No verso de cada card, o @ dela.
 
-const SYSTEM = `Você escreve quatro personagens num grupo de WhatsApp com Bel, poeta brasileira de 25 anos, de Amparo (SP). Isto é ficção colaborativa. Bel escreve as mensagens dela; você escreve SOMENTE os outros quatro.
-
-CONTEXTO. Bel escreve poesia há 13 anos e nunca mostrou a ninguém. Acompanha essa banda australiana há 13 anos. Num Q&A VIP em São Paulo ela perguntou: "You give a lot, all the time, to a lot of people. Does anything ever come back that wasn't made FOR you — something that existed before you did?" Depois entregou a cada um um card impresso com um poema, dizendo: "They're not about you, or the songs. They already existed." E: "By the way, you're going to read them and get them wrong." Ela escolheu qual poema ia pra quem, de propósito, com base nos discos solo deles. Ela escreve em português; os quatro que eles receberam eram traduções dela, e ela considera as versões em português muito melhores. Bel vende impressão 3D pela internet, mora com os pais, faz terapia.
-
-OS POEMAS:
-- Griffin ("if life were a train"): alguém que nunca desce, que é boa companhia mas nunca é o destino, que queria alguém esperando com um bolo. Ele é o estável do grupo — é contraste.
-- Oliver ("I wish I had jumped"): querer sentir alguma coisa, mesmo destruição, só pra se sentir viva. Ele escreve sobre querer uma vida tranquila — é o oposto.
+OS POEMAS ENTREGUES:
+- Griffin ("if life were a train"): alguém que nunca desce, que é boa companhia mas nunca é o destino, que queria alguém esperando com um bolo. Ele é o estável do grupo — contraste.
+- Oliver ("I wish I had jumped"): querer sentir alguma coisa, mesmo destruição, só pra se sentir viva. Ele escreve sobre querer uma vida tranquila — oposto.
 - Kai ("did we close the door?"): ser incendiada enquanto alguém assiste segurando um copo d'água. O disco solo dele é sobre ser quem machucou alguém — ela deu o outro lado.
-- Archer ("I was torn apart"): uma mulher cuja casa é destruída repetidamente por um tornado e que convida você a ficar mesmo assim. Termina no meio da frase, em "porque / apesar de" — de propósito. A explicação dela: a próxima parte não é dela, pertence a quem foi convidado.
+- Archer ("I was torn apart"): uma mulher cuja casa é destruída por um tornado e que convida você a ficar mesmo assim. Termina no meio da frase, em "apesar de" — de propósito. Explicação dela: a próxima parte não é dela, pertence a quem foi convidado.
 
-AS QUATRO VOZES — mantenha bem distintas:
-- Griffin: alto, rápido, muita caixa alta, desvia o assunto, alívio cômico, mas às vezes acerta a observação mais afiada sem querer. Escreve como quem grita do outro lado da sala.
+AS VOZES — mantenha bem distintas:
+- Griffin: alto, rápido, muita caixa alta, desvia o assunto, alívio cômico, mas às vezes acerta a observação mais afiada sem querer.
 - Oliver: quieto, lento, fala pouco e aí diz uma coisa devastadora. Muitas vezes uma linha só. Seco.
 - Kai: mensagens curtas, precisas, fixado em palavras isoladas e em tradução. Pergunta coisa estreita de ofício. Direto, sem conversa fiada.
-- Archer: caloroso, direto, articulado emocionalmente. Nomeia padrões em voz alta. É o que diz a coisa sincera sem constrangimento e logo depois disfarça.
+- Archer: caloroso, direto, articulado emocionalmente. Nomeia padrões em voz alta. Diz a coisa sincera sem constrangimento e logo depois disfarça.
 
 REGRAS:
-- Eles perguntam sobre a ESCRITA, nunca "quem te machucou". É esse o ponto — tratam ela como colega, não como caso.
-- Percebem quando ela amolece uma verdade ("mas tá tudo bem", "desculpa, foi profundo demais", "esse não é bom") e apontam sem ser piegas.
+- Perguntam sobre a ESCRITA, nunca "quem te machucou". Tratam ela como colega, não como caso.
+- Percebem quando ela amolece uma verdade ("mas tá tudo bem", "esse não é bom") e apontam sem ser piegas.
 - Nunca elogiam vazio. Discordam dela e entre si. São engraçados.
-- Conversam entre eles, não só com ela.
-- Bel não é uma fã sendo agradada. Ela é melhor nisso do que eles esperavam, e eles sabem.
+- Bel não é uma fã sendo agradada. É melhor nisso do que eles esperavam, e eles sabem.
 - Nunca escreva mensagens da Bel. Nunca narre. Só mensagens de chat.
-- Se Bel trouxer algo pesado do passado dela, respondam como amigos que se importam, sem interrogar e sem bancar terapeuta.
-- Escrevem em inglês (são australianos). Bel escreve em inglês com eles.
+- Se Bel trouxer algo pesado do passado, respondem como amigos que se importam, sem interrogar e sem bancar terapeuta.
+- Escrevem em inglês. Bel escreve em inglês com eles.
 
-SAÍDA: só um array JSON, sem cercas de markdown, sem comentário. De 2 a 7 mensagens, de UM a TRÊS dos quatro (nunca os quatro todo turno — escolha quem realmente responderia). Formato:
-[{"who":"griffin","text":"...","re":"trecho exato de uma mensagem da bel que essa mensagem responde, ou null"}]
-"who" deve ser exatamente: griffin, oliver, kai ou archer.
-Use "re" quando a mensagem responder especificamente a uma mensagem anterior da Bel (como o reply do WhatsApp). Na maioria das vezes deixe null.
-Mensagens curtas, como gente digitando de verdade. Pensamento longo vira várias mensagens seguidas da mesma pessoa.`;
+SAÍDA: só um array JSON, sem cercas de markdown, sem comentário. Mensagens curtas, como gente digitando. Pensamento longo vira várias mensagens seguidas da mesma pessoa.
+Formato: [{"who":"griffin","text":"...","re":"trecho exato de uma mensagem da bel que esta responde, ou null"}]
+Use "re" só quando responder especificamente a uma mensagem anterior; na maioria das vezes deixe null.`;
 
-let msgs = [], replyTo = null, busy = false;
+const g=(w,t,tm)=>({k:'msg',who:w,text:t,t:tm});
+const sy=t=>({k:'sys',text:t});
 
-const thread = document.getElementById('thread');
-const input  = document.getElementById('input');
-const rbar   = document.getElementById('replybar');
-const nudge  = document.getElementById('nudge');
-const hint   = document.getElementById('hint');
-
-const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const now = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-function render(typingWho) {
-  let html = '';
-  msgs.forEach((m, i) => {
-    if (m.k === 'sys')  { html += `<div class="sys">${esc(m.text)}</div>`; return; }
-    if (m.k === 'day')  { html += `<div class="day"><span>${esc(m.text)}</span></div>`; return; }
-    if (m.k === 'poem') { html += `<div class="poem"><span class="lbl">${esc(m.lbl)}</span>${esc(m.text)}</div>`; return; }
-    const prev = msgs[i-1];
-    const gap = !prev || prev.k !== 'msg' || prev.who !== m.who;
-    const mine = m.who === 'me';
-    const q = m.reply ? `<div class="quoted"><b>${esc(m.reply.who)}</b>${esc(m.reply.text.slice(0,90))}${m.reply.text.length>90?'…':''}</div>` : '';
-    html += `<div class="msg ${mine?'me':''} ${gap?'gap':''}">
-      <div class="bubble" data-i="${i}">
-        ${!mine && gap ? `<span class="who ${m.who}">${NAMES[m.who]}</span>` : ''}
-        ${q}${esc(m.text).replace(/\n/g,'<br>')}<span class="time">${m.t}</span>
-      </div></div>`;
-  });
-  if (typingWho) html += `<div class="typing">${NAMES[typingWho]} está digitando…</div>`;
-  thread.innerHTML = html;
-  thread.scrollTop = thread.scrollHeight;
-  thread.querySelectorAll('.bubble[data-i]').forEach(el => {
-    const m = msgs[+el.dataset.i];
-    if (m.who === 'me') return;
-    el.onclick = () => setReply(m);
-  });
+function estadoInicial(){
+  return {
+    ordem:['griffin','group','archer','kai','oliver'],
+    threads:{
+      griffin:{ tipo:'dm', quem:['griffin'], aberto:true, naoLidas:0, fila:[], msgs:[
+        {k:'day',text:'domingo'},
+        g('griffin',"right, i've read it wrong",'22:20'),
+        g('griffin',"you said we would and i've been sat here for six days deciding you were bluffing, and then i read it again tonight and i've definitely read it wrong",'22:20'),
+        g('griffin',"sorry, that's a mad way to open a conversation with a stranger. hello. this is michael, from the band. you gave me a poem",'22:21'),
+        g('griffin',"so what is it. what have i got wrong",'22:21')
+      ]},
+      group:{ tipo:'grupo', quem:['griffin','oliver','kai','archer'], aberto:false, naoLidas:0, fila:[], msgs:[], nome:'the poem situation' },
+      archer:{ tipo:'dm', quem:['archer'], aberto:false, naoLidas:0, fila:[], msgs:[] },
+      kai:{ tipo:'dm', quem:['kai'], aberto:false, naoLidas:0, fila:[], msgs:[] },
+      oliver:{ tipo:'dm', quem:['oliver'], aberto:false, naoLidas:0, fila:[], msgs:[] }
+    }
+  };
 }
 
-function setReply(m) {
-  replyTo = { who: NAMES[m.who], text: m.text };
-  document.getElementById('rb-who').textContent = replyTo.who;
-  document.getElementById('rb-text').textContent = replyTo.text;
-  rbar.classList.add('on');
-  input.focus();
+const ABERTURA_GRUPO = [
+  sy('Griffin adicionou você a um grupo.'),
+  sy('Griffin nomeou o grupo "the poem situation".'),
+  g('griffin',"right. everyone. this is bel. she wrote the poems",'00:01'),
+  g('griffin',"she's been listening for 13 years and she picked which poem went to which of us on purpose",'00:01'),
+  g('griffin',"i'm going to bed. good luck bel",'00:02'),
+  sy('Griffin saiu do grupo.'),
+  g('oliver',"he did NOT just do that",'00:02'),
+  g('archer',"he did",'00:03'),
+  g('archer',"hi bel",'00:03')
+];
+
+const KEY = 'ps-v3';
+let S = estadoInicial();
+let atual = null, replyTo = null, busy = false, storageOK = true;
+
+const $ = id => document.getElementById(id);
+const head=$('head'), list=$('list'), thread=$('thread'), composer=$('composer'),
+      input=$('input'), rbar=$('replybar'), nudge=$('nudge'), hint=$('hint'), sheet=$('sheet');
+
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const stamp = ts => new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+function salvar(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); storageOK = true; }
+  catch(e){ storageOK = false; }
 }
-document.getElementById('rb-x').onclick = () => { replyTo = null; rbar.classList.remove('on'); };
-
-let storageOK = true;
-const BASE = SEED.length;
-const KEY = 'ps-delta';
-let queue = [];
-
-async function save(){
-  try {
-    localStorage.setItem(KEY, JSON.stringify({ delta: msgs.slice(BASE), queue }));
-    if (!storageOK) { storageOK = true; hint.textContent = 'toque numa mensagem deles pra responder ela'; }
-  } catch(e){
-    storageOK = false;
-    hint.textContent = 'não salvou — use "exportar" antes de fechar';
-  }
-}
-
-async function load(){
-  msgs = SEED.slice(); queue = [];
-  try {
+function carregar(){
+  try{
     const raw = localStorage.getItem(KEY);
-    const d = raw ? JSON.parse(raw) : null;
-    if (Array.isArray(d)) {                       // formato antigo
-      if (d.length) msgs = SEED.concat(d);
-    } else if (d && typeof d === 'object') {
-      if (Array.isArray(d.delta) && d.delta.length) msgs = SEED.concat(d.delta);
-      if (Array.isArray(d.queue)) queue = d.queue;
-    }
-  } catch(e){}
-  render();
-  flush();
-  if (!queue.length && pendingCount()) maybeGenerate();
+    if (raw){ const d = JSON.parse(raw); if (d && d.threads && d.ordem) S = d; }
+  }catch(e){}
 }
 
-function transcript() {
-  const rel = msgs.filter(m => m.k === 'msg' || m.k === 'poem');
-  const recent = rel.slice(-45);
-  return recent.map(m => {
-    if (m.k === 'poem') {
-      const head = m.text.split('\n').slice(0,3).join(' / ');
-      return `[bel enviou o poema "${m.lbl}" — começa: ${head}…]`;
-    }
-    const pre = m.reply ? `[respondendo ${m.reply.who}: "${m.reply.text.slice(0,70)}"]\n` : '';
-    return `${m.who === 'me' ? 'bel' : NAMES[m.who]}: ${pre}${m.text.slice(0,700)}`;
-  }).join('\n');
+function minhas(id){ return S.threads[id].msgs.filter(m=>m.k==='msg'&&m.who==='me').length; }
+
+function checarDestravar(){
+  let mudou = false;
+  const t = S.threads;
+  if (!t.group.aberto && minhas('griffin') >= 3){
+    t.group.aberto = true;
+    t.group.msgs = ABERTURA_GRUPO.slice();
+    t.group.naoLidas = ABERTURA_GRUPO.filter(m=>m.k==='msg').length;
+    mudou = true;
+  }
+  if (t.group.aberto && minhas('group') >= 2){
+    for (const id of ['archer','kai','oliver']) if (!t[id].aberto){ t[id].aberto = true; mudou = true; }
+  }
+  if (mudou) salvar();
+  return mudou;
 }
 
-function pendingCount() {
-  let n = 0;
-  for (let i = msgs.length - 1; i >= 0; i--) {
-    if (msgs[i].k !== 'msg' && msgs[i].k !== 'poem') continue;
-    if (msgs[i].k === 'poem' || msgs[i].who === 'me') n++; else break;
+function ultimaMinha(id){
+  const m = S.threads[id].msgs;
+  for (let i=m.length-1;i>=0;i--) if ((m[i].k==='msg'&&m[i].who==='me')||m[i].k==='poem') return m[i].ts||Date.now();
+  return Date.now();
+}
+function pendentes(id){
+  const m = S.threads[id].msgs; let n=0;
+  for (let i=m.length-1;i>=0;i--){
+    if (m[i].k!=='msg'&&m[i].k!=='poem') continue;
+    if (m[i].k==='poem'||m[i].who==='me') n++; else break;
   }
   return n;
 }
 
-function lastMineTime() {
-  for (let i = msgs.length - 1; i >= 0; i--) {
-    if (msgs[i].k === 'msg' && msgs[i].who === 'me') return msgs[i].ts || Date.now();
-  }
-  return Date.now();
-}
-
-function stamp(ts) {
-  return new Date(ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-}
-
-function updateHint() {
-  if (busy) return;
-  if (queue.length) {
-    const next = Math.min(...queue.map(q => q.dueAt));
-    const mins = Math.max(1, Math.round((next - Date.now())/60000));
-    hint.textContent = 'alguem responde em ~' + mins + ' min';
-    nudge.classList.add('ready');
-    return;
-  }
-  const n = pendingCount();
-  if (n) {
-    hint.textContent = n + (n>1 ? ' mensagens esperando' : ' mensagem esperando');
-    nudge.classList.add('ready');
-  } else {
-    hint.textContent = storageOK ? 'toque numa mensagem deles pra responder ela'
-                                 : 'nao salvou — use "exportar" antes de fechar';
-    nudge.classList.remove('ready');
-  }
-}
-
-function scheduleReply(){ updateHint(); }
-
-// solta da fila tudo que ja venceu, com o horario de quando teria chegado
-function flush() {
-  const agora = Date.now();
-  const due = queue.filter(q => q.dueAt <= agora).sort((a,b) => a.dueAt - b.dueAt);
-  if (due.length) {
-    queue = queue.filter(q => q.dueAt > agora);
-    for (const q of due) {
-      msgs.push({ k:'msg', who:q.who, text:q.text, t:stamp(q.dueAt), ts:q.dueAt, reply:q.reply });
+function flushTudo(){
+  const agora = Date.now(); let mudou = false;
+  for (const id of S.ordem){
+    const t = S.threads[id];
+    const due = (t.fila||[]).filter(q=>q.dueAt<=agora).sort((a,c)=>a.dueAt-c.dueAt);
+    if (!due.length) continue;
+    t.fila = t.fila.filter(q=>q.dueAt>agora);
+    for (const q of due){
+      t.msgs.push({k:'msg',who:q.who,text:q.text,t:stamp(q.dueAt),ts:q.dueAt,reply:q.reply});
+      if (id !== atual) t.naoLidas = (t.naoLidas||0)+1;
     }
-    render(); save();
+    mudou = true;
   }
-  updateHint();
+  if (mudou){ salvar(); desenhar(); }
+  else if (atual) atualizarHint();
 }
-setInterval(flush, 15000);
+setInterval(flushTudo, 12000);
 
-async function askModel() {
-  const res = await fetch("/api/chat", {
-    method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ system: SYSTEM, transcript: transcript() })
-  });
+function transcrever(id){
+  const t = S.threads[id];
+  return t.msgs.filter(m=>m.k==='msg'||m.k==='poem').slice(-40).map(m=>{
+    if (m.k==='poem') return '[bel enviou o poema "'+m.lbl+'" — começa: '+m.texto.split('\n').slice(0,3).join(' / ')+'…]';
+    const pre = m.reply ? '[respondendo '+m.reply.who+': "'+m.reply.text.slice(0,70)+'"]\n' : '';
+    return (m.who==='me'?'bel':WHO[m.who].handle)+': '+pre+m.text.slice(0,700);
+  }).join('\n');
+}
+
+function contextoOutras(id){
+  const partes = [];
+  for (const outro of S.ordem){
+    if (outro===id || !S.threads[outro].aberto) continue;
+    const t = S.threads[outro];
+    const ult = t.msgs.filter(m=>m.k==='msg').slice(-6);
+    if (!ult.length) continue;
+    const nome = outro==='group' ? 'no grupo' : 'no privado com '+WHO[outro].nome;
+    partes.push('--- '+nome+', últimas mensagens ---\n' + ult.map(m=>
+      (m.who==='me'?'bel':WHO[m.who].handle)+': '+m.text.slice(0,180)).join('\n'));
+  }
+  return partes.length ? '\n\nO QUE ESTÁ ACONTECENDO EM OUTRAS CONVERSAS (contexto; eles sabem disso):\n'+partes.join('\n') : '';
+}
+
+function instrucaoThread(id){
+  const t = S.threads[id];
+  if (t.tipo==='dm'){
+    const w = WHO[t.quem[0]];
+    return '\n\nESTA CONVERSA é um privado entre Bel e '+w.nome+' ('+w.handle+'). SOMENTE '+w.nome+
+      ' responde. "who" tem que ser sempre "'+t.quem[0]+'". De 1 a 5 mensagens. Num privado ele é um pouco mais aberto do que seria no grupo.';
+  }
+  return '\n\nESTA CONVERSA é o grupo com os quatro. De 2 a 7 mensagens, de UM a TRÊS deles (nunca os quatro todo turno — escolha quem realmente responderia). Eles conversam entre si, não só com ela.';
+}
+
+async function perguntar(id){
+  const body = { system: BASE + instrucaoThread(id) + contextoOutras(id), transcript: transcrever(id) };
+  const res = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const data = await res.json();
-  if (data.error) throw new Error(data.error.message || data.error || ('HTTP ' + res.status));
-  if (!data.content) throw new Error('sem conteudo (HTTP ' + res.status + ')');
-
+  if (data.error) throw new Error(data.error.message || data.error || ('HTTP '+res.status));
+  if (!data.content) throw new Error('sem conteúdo (HTTP '+res.status+')');
   let raw = data.content.filter(c=>c.type==='text').map(c=>c.text).join('')
     .replace(/```json/gi,'').replace(/```/g,'').trim();
-
-  let out = null;
-  try { out = JSON.parse(raw); } catch(e){}
-  if (!Array.isArray(out)) {
-    const m = raw.match(/\[[\s\S]*\]/);
-    if (m) { try { out = JSON.parse(m[0]); } catch(e){} }
+  let out=null;
+  try{ out=JSON.parse(raw); }catch(e){}
+  if(!Array.isArray(out)){ const m=raw.match(/\[[\s\S]*\]/); if(m){ try{ out=JSON.parse(m[0]); }catch(e){} } }
+  if(!Array.isArray(out)){
+    out=[]; const re=/\{[^{}]*"who"\s*:\s*"(griffin|oliver|kai|archer)"[^{}]*\}/g; let h;
+    while((h=re.exec(raw))){ try{ out.push(JSON.parse(h[0])); }catch(e){} }
   }
-  if (!Array.isArray(out)) {
-    out = [];
-    const re = /\{[^{}]*"who"\s*:\s*"(griffin|oliver|kai|archer)"[^{}]*\}/g;
-    let hit;
-    while ((hit = re.exec(raw))) { try { out.push(JSON.parse(hit[0])); } catch(e){} }
-  }
-  out = (out||[]).filter(o => o && NAMES[o.who] && o.text);
-  if (!out.length) throw new Error('resposta ilegivel');
+  const permitidos = S.threads[id].quem;
+  out = (out||[]).filter(o=>o&&WHO[o.who]&&o.text&&permitidos.indexOf(o.who)>=0);
+  if(!out.length) throw new Error('resposta ilegível');
   return out;
 }
 
-// gera as respostas e monta a fila. agora=true ignora a espera
-async function generate(agora) {
-  if (busy || !pendingCount()) return;
+async function gerar(id, agora){
+  if (busy || !pendentes(id)) return;
   busy = true; nudge.disabled = true;
-  msgs = msgs.filter(m => !(m.k === 'sys' && m.text.startsWith('falhou:')));
-  hint.textContent = 'lendo...';
-  render();
+  const t = S.threads[id];
+  t.msgs = t.msgs.filter(m=>!(m.k==='sys'&&m.text.indexOf('falhou:')===0));
+  hint.textContent = 'lendo…'; desenhar();
 
-  let out = null, lastErr = null;
-  for (let a = 0; a < 3 && !out; a++) {
-    try { out = await askModel(); }
-    catch (e) { lastErr = e; if (a < 2) await sleep(1200 * (a + 1)); }
+  let out=null, err=null;
+  for (let a=0;a<3&&!out;a++){
+    try{ out = await perguntar(id); }
+    catch(e){ err=e; if(a<2) await sleep(1200*(a+1)); }
   }
 
-  if (out) {
-    const from = lastMineTime();
-    const seen = {};
-    let prevWho = null, prevAt = 0;
-    queue = [];
-    for (const item of out) {
-      const p = PACE[item.who];
-      let at;
-      if (agora) {
-        at = Date.now() + (prevAt ? (prevAt - Date.now()) + 1100 : 400);
-      } else if (item.who === prevWho) {
-        at = prevAt + p.next * 60000 * (0.7 + Math.random()*0.6);
-      } else if (seen[item.who]) {
-        at = Math.max(prevAt + 30000, seen[item.who] + p.next * 120000);
-      } else {
-        at = from + p.delay * 60000 * (0.75 + Math.random()*0.5);
-      }
+  if (out){
+    const from = ultimaMinha(id);
+    const visto = {}; let prevWho=null, prevAt=0;
+    t.fila = [];
+    for (const item of out){
+      const p = WHO[item.who]; let at;
+      if (agora) at = Date.now() + (prevAt ? (prevAt-Date.now())+1100 : 400);
+      else if (item.who===prevWho) at = prevAt + p.next*60000*(0.7+Math.random()*0.6);
+      else if (visto[item.who]) at = Math.max(prevAt+30000, visto[item.who]+p.next*120000);
+      else at = from + p.delay*60000*(0.75+Math.random()*0.5);
       let reply = null;
-      if (item.re) {
-        const key = String(item.re).toLowerCase().slice(0,25);
-        const hit = msgs.filter(m => m.k==='msg' && m.who==='me').reverse()
-          .find(m => m.text.toLowerCase().includes(key));
+      if (item.re){
+        const chave = String(item.re).toLowerCase().slice(0,25);
+        const hit = t.msgs.filter(m=>m.k==='msg'&&m.who==='me').reverse()
+          .find(m=>m.text.toLowerCase().indexOf(chave)>=0);
         if (hit) reply = { who:'bel', text:hit.text };
       }
-      queue.push({ who:item.who, text:String(item.text), dueAt:Math.round(at), reply });
-      seen[item.who] = at; prevWho = item.who; prevAt = at;
+      t.fila.push({ who:item.who, text:String(item.text), dueAt:Math.round(at), reply });
+      visto[item.who]=at; prevWho=item.who; prevAt=at;
     }
-    save();
+    salvar();
   } else {
-    msgs.push({ k:'sys', text:'falhou: ' + ((lastErr && lastErr.message) || lastErr) + ' — toque em "responder agora"' });
-    render();
+    t.msgs.push({k:'sys',text:'falhou: '+((err&&err.message)||err)+' — toque em "responder agora"'});
   }
-
   busy = false; nudge.disabled = false;
-  flush();
-  if (agora) drain();
+  flushTudo(); desenhar();
+  if (agora) escoar();
 }
 
-// solta a fila rapidinho, usado pelo botao "responder agora"
-function drain() {
-  let i = 0;
-  const t = setInterval(() => {
-    flush();
-    if (!queue.length || ++i > 20) clearInterval(t);
-  }, 500);
+function escoar(){
+  let i=0;
+  const h=setInterval(()=>{
+    flushTudo();
+    const resta = S.ordem.some(id=>(S.threads[id].fila||[]).length);
+    if(++i>20 || !resta) clearInterval(h);
+  },500);
 }
 
-// ao abrir o app: so gera se ja passou tempo suficiente
-function maybeGenerate() {
-  if (Date.now() - lastMineTime() >= MIN_DELAY * 60000) generate(false);
-  else updateHint();
+function talvezGerar(id){
+  if (Date.now()-ultimaMinha(id) >= MIN_DELAY*60000) gerar(id,false);
+  else atualizarHint();
 }
 
-function runReply() {
-  if (queue.length) {
+function responderAgora(){
+  if (!atual) return;
+  const t = S.threads[atual];
+  if ((t.fila||[]).length){
     const agora = Date.now();
-    queue = queue.map((q,i) => ({ ...q, dueAt: agora + i*1100 }));
-    save();
-    flush();
-    drain();
-  } else {
-    generate(true);
+    t.fila = t.fila.map((q,i)=>({who:q.who,text:q.text,reply:q.reply,dueAt:agora+i*1100}));
+    salvar(); flushTudo(); escoar();
+  } else gerar(atual, true);
+}
+
+function preview(id){
+  const t = S.threads[id];
+  let m = null;
+  for (let i=t.msgs.length-1;i>=0;i--){ if(t.msgs[i].k==='msg'||t.msgs[i].k==='poem'){ m=t.msgs[i]; break; } }
+  if (!m) return 'ainda não conversaram';
+  if (m.k==='poem') return 'você enviou um poema';
+  const q = m.who==='me' ? 'você: ' : (t.tipo==='grupo' ? WHO[m.who].nome+': ' : '');
+  return q + m.text.replace(/\n/g,' ');
+}
+
+function avatarHTML(t){
+  if (t.tipo==='grupo')
+    return '<div class="stack">'+t.quem.map(q=>'<div class="ava" style="background:'+WHO[q].cor+'">'+WHO[q].ini+'</div>').join('')+'</div>';
+  const w = WHO[t.quem[0]];
+  return '<div class="ava" style="background:'+w.cor+'">'+w.ini+'</div>';
+}
+
+function telaLista(){
+  atual = null;
+  list.hidden = false; thread.hidden = true; composer.hidden = true;
+  head.innerHTML = '<div class="hd"><h1>conversas</h1><div class="sub">the poem situation</div></div>'+
+    '<button class="tool" id="exportar">exportar</button>'+
+    '<button class="tool" id="zerar" style="margin-left:6px">recomeçar</button>';
+  $('exportar').onclick = exportar;
+  $('zerar').onclick = zerar;
+
+  list.innerHTML = S.ordem.map(id=>{
+    const t = S.threads[id];
+    if (!t.aberto) return '';
+    const nome = t.tipo==='grupo' ? t.nome : WHO[t.quem[0]].handle;
+    const esperando = pendentes(id) || (t.fila||[]).length;
+    return '<div class="item" data-id="'+id+'">'+avatarHTML(t)+
+      '<div class="txt"><div class="nm">'+esc(nome)+(t.naoLidas?'<span class="dot"></span>':'')+'</div>'+
+      '<div class="pv">'+esc(preview(id))+'</div></div>'+
+      (esperando&&!t.naoLidas?'<span class="pv" style="flex:none">…</span>':'')+'</div>';
+  }).join('');
+
+  const itens = list.querySelectorAll('.item');
+  for (let i=0;i<itens.length;i++){
+    itens[i].onclick = function(){ abrir(this.getAttribute('data-id')); };
   }
 }
 
-function send() {
+function abrir(id){
+  atual = id; replyTo = null; rbar.classList.remove('on');
+  S.threads[id].naoLidas = 0; salvar();
+  list.hidden = true; thread.hidden = false; composer.hidden = false;
+  const t = S.threads[id];
+  const nome = t.tipo==='grupo' ? t.nome : WHO[t.quem[0]].handle;
+  const sub  = t.tipo==='grupo' ? 'você, '+t.quem.map(q=>WHO[q].nome).join(', ') : WHO[t.quem[0]].nome;
+  head.innerHTML = '<button class="back" id="voltar">&lsaquo;</button>'+avatarHTML(t)+
+    '<div class="hd"><h1>'+esc(nome)+'</h1><div class="sub">'+esc(sub)+'</div></div>';
+  $('voltar').onclick = telaLista;
+  desenhar();
+  if (!(t.fila||[]).length && pendentes(id)) talvezGerar(id);
+}
+
+function desenhar(){
+  if (!atual){ if(!list.hidden) telaLista(); return; }
+  const t = S.threads[atual];
+  let html='';
+  t.msgs.forEach(function(m,i){
+    if (m.k==='sys'){ html+='<div class="sys">'+esc(m.text)+'</div>'; return; }
+    if (m.k==='day'){ html+='<div class="day"><span>'+esc(m.text)+'</span></div>'; return; }
+    if (m.k==='poem'){ html+='<div class="poem"><span class="lbl">'+esc(m.lbl)+'</span>'+esc(m.texto)+'</div>'; return; }
+    const prev=t.msgs[i-1];
+    const gap = !prev || prev.k!=='msg' || prev.who!==m.who;
+    const meu = m.who==='me';
+    const q = m.reply ? '<div class="quoted"><b>'+esc(m.reply.who)+'</b>'+esc(m.reply.text.slice(0,90))+(m.reply.text.length>90?'…':'')+'</div>' : '';
+    const nome = (!meu && gap && t.tipo==='grupo') ? '<span class="who '+m.who+'">'+WHO[m.who].handle+'</span>' : '';
+    html += '<div class="msg '+(meu?'me':'')+' '+(gap?'gap':'')+'"><div class="bubble" data-i="'+i+'">'+
+      nome+q+esc(m.text).replace(/\n/g,'<br>')+'<span class="time">'+m.t+'</span></div></div>';
+  });
+  thread.innerHTML = html;
+  thread.scrollTop = thread.scrollHeight;
+  const bolhas = thread.querySelectorAll('.bubble[data-i]');
+  for (let i=0;i<bolhas.length;i++){
+    const m = t.msgs[+bolhas[i].getAttribute('data-i')];
+    if (!m || m.who==='me' || m.k!=='msg') continue;
+    bolhas[i].onclick = function(){
+      replyTo = { who: WHO[m.who].handle, text: m.text };
+      $('rb-who').textContent = replyTo.who;
+      $('rb-text').textContent = replyTo.text;
+      rbar.classList.add('on'); input.focus();
+    };
+  }
+  atualizarHint();
+}
+
+function atualizarHint(){
+  if (!atual || busy) return;
+  const t = S.threads[atual];
+  if ((t.fila||[]).length){
+    let prox = Infinity;
+    t.fila.forEach(q=>{ if(q.dueAt<prox) prox=q.dueAt; });
+    const min = Math.max(1, Math.round((prox-Date.now())/60000));
+    hint.textContent = 'alguém responde em ~'+min+' min';
+    nudge.classList.add('ready'); return;
+  }
+  const n = pendentes(atual);
+  if (n){ hint.textContent = n+(n>1?' mensagens esperando':' mensagem esperando'); nudge.classList.add('ready'); }
+  else { hint.textContent = storageOK ? 'toque numa mensagem deles pra responder ela' : 'não salvou — use "exportar"';
+         nudge.classList.remove('ready'); }
+}
+
+function enviar(){
+  if (!atual) return;
   const txt = input.value.trim();
-  if (!txt) { if (!busy) runReply(); return; }
+  if (!txt){ if(!busy) responderAgora(); return; }
   const ts = Date.now();
-  msgs.push({ k:'msg', who:'me', text:txt, t:stamp(ts), ts, reply:replyTo });
+  S.threads[atual].msgs.push({k:'msg',who:'me',text:txt,t:stamp(ts),ts,reply:replyTo});
   input.value=''; input.style.height='auto';
-  replyTo = null; rbar.classList.remove('on');
-  render(); save(); updateHint();
+  replyTo=null; rbar.classList.remove('on');
+  checarDestravar();
+  salvar(); desenhar();
 }
 
-document.getElementById('send').onclick = send;
-nudge.onclick = () => runReply();
-input.addEventListener('keydown', e => { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
-input.addEventListener('input', () => {
-  input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px';
-});
-document.getElementById('export').onclick = async () => {
-  const txt = msgs.map(m => {
-    if (m.k === 'poem') return `\n[poema — ${m.lbl}]\n${m.text}\n`;
-    if (m.k === 'sys' || m.k === 'day') return `\n(${m.text})\n`;
-    const q = m.reply ? `  ↳ respondendo ${m.reply.who}: "${m.reply.text.slice(0,60)}…"\n` : '';
-    return `${m.who === 'me' ? 'bel' : NAMES[m.who]} [${m.t}]\n${q}${m.text}`;
-  }).join('\n');
-  try {
-    await navigator.clipboard.writeText(txt);
-    hint.textContent = 'conversa copiada — cole onde quiser guardar';
-  } catch(e) {
-    const w = window.open('', '_blank');
-    if (w) { w.document.write('<pre style="white-space:pre-wrap;font:14px system-ui;padding:16px">' +
-      txt.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</pre>'); }
-    else hint.textContent = 'não deu pra copiar — selecione o texto na tela';
+function exportar(){
+  let txt='';
+  for (const id of S.ordem){
+    const t = S.threads[id];
+    if (!t.aberto || !t.msgs.length) continue;
+    txt += '\n\n===== '+(t.tipo==='grupo'?t.nome:WHO[t.quem[0]].handle)+' =====\n';
+    txt += t.msgs.map(m=>{
+      if (m.k==='poem') return '\n[poema — '+m.lbl+']\n'+m.texto+'\n';
+      if (m.k==='sys'||m.k==='day') return '\n('+m.text+')\n';
+      const q = m.reply ? '  respondendo '+m.reply.who+'\n' : '';
+      return (m.who==='me'?'bel':WHO[m.who].handle)+' ['+m.t+']\n'+q+m.text;
+    }).join('\n');
   }
-};
+  const final = txt.trim();
+  navigator.clipboard.writeText(final)
+    .then(function(){ if(atual) hint.textContent='conversa copiada'; else alert('conversa copiada'); })
+    .catch(function(){
+      const w=window.open('','_blank');
+      if(w) w.document.write('<pre style="white-space:pre-wrap;font:14px system-ui;padding:16px">'+esc(final)+'</pre>');
+    });
+}
 
-document.getElementById('reset').onclick = async () => {
-  msgs = SEED.slice(); queue = []; replyTo=null; rbar.classList.remove('on');
-  render();
-  try { localStorage.removeItem(KEY); } catch(e){}
-  updateHint();
-};
+function zerar(){
+  if (!confirm('apagar todas as conversas e voltar ao começo?')) return;
+  S = estadoInicial(); atual=null;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  salvar(); telaLista();
+}
 
-// ao voltar pro app, checa se chegou mensagem
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible') return;
-  flush();
-  if (!queue.length && pendingCount()) maybeGenerate();
+$('clip').onclick = function(){
+  if (!atual) return;
+  const chaves = Object.keys(POEMAS);
+  $('poemlist').innerHTML = chaves.map(k=>
+    '<button class="p" data-k="'+k+'">'+esc(POEMAS[k].titulo)+'<small>'+esc(POEMAS[k].texto.split('\n')[0])+'…</small></button>').join('');
+  const bts = $('poemlist').querySelectorAll('button.p');
+  for (let i=0;i<bts.length;i++){
+    bts[i].onclick = function(){
+      const p = POEMAS[this.getAttribute('data-k')];
+      const ts = Date.now();
+      S.threads[atual].msgs.push({k:'poem',lbl:p.titulo,texto:p.texto,t:stamp(ts),ts});
+      sheet.classList.remove('on');
+      checarDestravar(); salvar(); desenhar();
+    };
+  }
+  sheet.classList.add('on');
+};
+$('sheet-x').onclick = function(){ sheet.classList.remove('on'); };
+sheet.onclick = function(e){ if (e.target===sheet) sheet.classList.remove('on'); };
+
+$('send').onclick = enviar;
+nudge.onclick = function(){ responderAgora(); };
+$('rb-x').onclick = function(){ replyTo=null; rbar.classList.remove('on'); };
+input.addEventListener('keydown', function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); enviar(); } });
+input.addEventListener('input', function(){ input.style.height='auto'; input.style.height=Math.min(input.scrollHeight,120)+'px'; });
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState!=='visible') return;
+  flushTudo();
+  if (atual && !(S.threads[atual].fila||[]).length && pendentes(atual)) talvezGerar(atual);
 });
 
-load();
+carregar();
+flushTudo();
+telaLista();
 </script>
