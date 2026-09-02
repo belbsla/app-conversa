@@ -468,18 +468,17 @@ function checarDestravar(){
   return mudou;
 }
 
+function minhasPendentes(id){
+  return S.threads[id].msgs.filter(m => (m.k==='poem' || (m.k==='msg'&&m.who==='me')) && !m.resp);
+}
+function pendentes(id){ return minhasPendentes(id).length; }
+
 function ultimaMinha(id){
+  const p = minhasPendentes(id);
+  if (p.length) return p[0].ts || Date.now();
   const m = S.threads[id].msgs;
   for (let i=m.length-1;i>=0;i--) if ((m[i].k==='msg'&&m[i].who==='me')||m[i].k==='poem') return m[i].ts||Date.now();
   return Date.now();
-}
-function pendentes(id){
-  const m = S.threads[id].msgs; let n=0;
-  for (let i=m.length-1;i>=0;i--){
-    if (m[i].k!=='msg'&&m[i].k!=='poem') continue;
-    if (m[i].k==='poem'||m[i].who==='me') n++; else break;
-  }
-  return n;
 }
 
 function flushTudo(){
@@ -528,9 +527,18 @@ function instrucaoThread(id){
   if (t.tipo==='dm'){
     const w = WHO[t.quem[0]];
     return '\n\nESTA CONVERSA é um privado entre Bel e '+w.nome+' ('+w.handle+'). SOMENTE '+w.nome+
-      ' responde. "who" tem que ser sempre "'+t.quem[0]+'". De 1 a 5 mensagens. Num privado ele é um pouco mais aberto do que seria no grupo.';
+      ' responde. Toda linha começa com "'+t.quem[0]+':". De 1 a 5 mensagens. Num privado ele é um pouco mais aberto do que seria no grupo.';
   }
-  return '\n\nESTA CONVERSA é o grupo com os quatro. De 2 a 7 mensagens, de UM a TRÊS deles (nunca os quatro todo turno — escolha quem realmente responderia). Eles conversam entre si, não só com ela.';
+  // quem anda sumido no grupo
+  const recentes = t.msgs.filter(m=>m.k==='msg'&&m.who!=='me').slice(-12).map(m=>m.who);
+  const fila = (t.fila||[]).map(q=>q.who);
+  const ativos = recentes.concat(fila);
+  const sumidos = t.quem.filter(q=>ativos.indexOf(q)<0);
+  let extra = '';
+  if (sumidos.length) extra = ' ATENÇÃO: '+sumidos.map(s=>WHO[s].nome).join(' e ')+
+    (sumidos.length>1?' não aparecem':' não aparece')+' há bastante tempo — inclua '+
+    (sumidos.length>1?'pelo menos um deles':'ele')+' nesta resposta.';
+  return '\n\nESTA CONVERSA é o grupo com os quatro. De 2 a 7 mensagens, de DOIS a TRÊS deles — nunca só uma pessoa, e nunca os quatro. Rode entre eles: quem respondeu bastante nas últimas mensagens deve dar espaço pra quem ficou quieto. Eles conversam entre si, não só com ela.'+extra;
 }
 
 function interpretar(raw, permitidos){
@@ -588,9 +596,12 @@ async function gerar(id, agora){
   }
 
   if (out){
-    const from = ultimaMinha(id);
+    const pend = minhasPendentes(id);
+    let from = ultimaMinha(id);
+    // se ainda tem gente na fila, o novo lote entra depois do que ja estava marcado
+    (t.fila||[]).forEach(q=>{ if (q.dueAt > from) from = q.dueAt; });
     const visto = {}; let prevWho=null, prevAt=0;
-    t.fila = [];
+    const novos = [];
     for (const item of out){
       const p = WHO[item.who]; let at;
       if (agora) at = Date.now() + (prevAt ? (prevAt-Date.now())+1100 : 400);
@@ -604,9 +615,11 @@ async function gerar(id, agora){
           .find(m=>m.text.toLowerCase().indexOf(chave)>=0);
         if (hit) reply = { who:'bel', text:hit.text };
       }
-      t.fila.push({ who:item.who, text:String(item.text), dueAt:Math.round(at), reply });
+      novos.push({ who:item.who, text:String(item.text), dueAt:Math.round(at), reply });
       visto[item.who]=at; prevWho=item.who; prevAt=at;
     }
+    t.fila = (t.fila||[]).concat(novos);
+    pend.forEach(m=>{ m.resp = true; });
     salvar();
   } else {
     t.msgs.push({k:'sys',text:'falhou: '+((err&&err.message)||err)+' — toque em "responder agora"'});
