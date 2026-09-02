@@ -378,9 +378,20 @@ REGRAS:
 - Se Bel trouxer algo pesado do passado, respondem como amigos que se importam, sem interrogar e sem bancar terapeuta.
 - Escrevem em inglês. Bel escreve em inglês com eles.
 
-SAÍDA: só um array JSON, sem cercas de markdown, sem comentário. Mensagens curtas, como gente digitando. Pensamento longo vira várias mensagens seguidas da mesma pessoa.
-Formato: [{"who":"griffin","text":"...","re":"trecho exato de uma mensagem da bel que esta responde, ou null"}]
-Use "re" só quando responder especificamente a uma mensagem anterior; na maioria das vezes deixe null.`;
+SAÍDA. Escreva uma mensagem por linha, sem mais nada — sem JSON, sem markdown, sem comentário, sem linha em branco. Cada linha começa com o nome de quem fala, dois pontos, e o texto:
+
+griffin: texto da mensagem
+griffin: outra mensagem seguida dele
+kai: texto do kai
+
+Nomes possíveis: griffin, oliver, kai, archer. Só isso, em minúsculas.
+Nunca quebre uma mensagem em várias linhas — se o pensamento é longo, vire várias mensagens, cada uma na sua linha, repetindo o nome.
+Mensagens curtas, como gente digitando de verdade.
+Para responder especificamente uma mensagem anterior da Bel (como o reply do WhatsApp), coloque um trecho dela entre colchetes antes dos dois pontos:
+
+archer [re: trecho da mensagem dela]: texto da resposta
+
+Use isso com moderação; na maioria das linhas não use.`;
 
 const g=(w,t,tm)=>({k:'msg',who:w,text:t,t:tm});
 const sy=t=>({k:'sys',text:t});
@@ -503,13 +514,13 @@ function contextoOutras(id){
   for (const outro of S.ordem){
     if (outro===id || !S.threads[outro].aberto) continue;
     const t = S.threads[outro];
-    const ult = t.msgs.filter(m=>m.k==='msg').slice(-6);
+    const ult = t.msgs.filter(m=>m.k==='msg').slice(-4);
     if (!ult.length) continue;
     const nome = outro==='group' ? 'no grupo' : 'no privado com '+WHO[outro].nome;
-    partes.push('--- '+nome+', últimas mensagens ---\n' + ult.map(m=>
-      (m.who==='me'?'bel':WHO[m.who].handle)+': '+m.text.slice(0,180)).join('\n'));
+    partes.push('--- '+nome+' ---\n' + ult.map(m=>
+      (m.who==='me'?'bel':WHO[m.who].handle)+': '+m.text.slice(0,120)).join('\n'));
   }
-  return partes.length ? '\n\nO QUE ESTÁ ACONTECENDO EM OUTRAS CONVERSAS (contexto; eles sabem disso):\n'+partes.join('\n') : '';
+  return partes.length ? '\n\nO QUE ANDA ACONTECENDO EM OUTRAS CONVERSAS (contexto; eles sabem disso):\n'+partes.join('\n') : '';
 }
 
 function instrucaoThread(id){
@@ -522,23 +533,43 @@ function instrucaoThread(id){
   return '\n\nESTA CONVERSA é o grupo com os quatro. De 2 a 7 mensagens, de UM a TRÊS deles (nunca os quatro todo turno — escolha quem realmente responderia). Eles conversam entre si, não só com ela.';
 }
 
+function interpretar(raw, permitidos){
+  const linhas = raw.replace(/```[a-z]*/gi,'').split('\n');
+  const re = /^\s*(griffin|oliver|kai|archer)\s*(?:\[\s*re\s*:\s*([^\]]{0,120})\])?\s*[:\-–]\s*(.+?)\s*$/i;
+  const out = [];
+  for (const linha of linhas){
+    const m = linha.match(re);
+    if (!m) continue;
+    const quem = m[1].toLowerCase();
+    if (permitidos.indexOf(quem) < 0) continue;
+    const texto = m[3].replace(/^["“](.*)["”]$/,'$1').trim();
+    if (texto) out.push({ who:quem, text:texto, re:m[2]||null });
+  }
+  if (out.length) return out;
+
+  // reserva: se vier em JSON mesmo assim
+  try{
+    const j = raw.match(/\[[\s\S]*\]/);
+    if (j){
+      const arr = JSON.parse(j[0]);
+      if (Array.isArray(arr)){
+        const lim = arr.filter(o=>o&&WHO[o.who]&&o.text&&permitidos.indexOf(o.who)>=0)
+                       .map(o=>({who:o.who,text:String(o.text),re:o.re||null}));
+        if (lim.length) return lim;
+      }
+    }
+  }catch(e){}
+  return [];
+}
+
 async function perguntar(id){
   const body = { system: BASE + instrucaoThread(id) + contextoOutras(id), transcript: transcrever(id) };
   const res = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const data = await res.json();
   if (data.error) throw new Error(data.error.message || data.error || ('HTTP '+res.status));
   if (!data.content) throw new Error('sem conteúdo (HTTP '+res.status+')');
-  let raw = data.content.filter(c=>c.type==='text').map(c=>c.text).join('')
-    .replace(/```json/gi,'').replace(/```/g,'').trim();
-  let out=null;
-  try{ out=JSON.parse(raw); }catch(e){}
-  if(!Array.isArray(out)){ const m=raw.match(/\[[\s\S]*\]/); if(m){ try{ out=JSON.parse(m[0]); }catch(e){} } }
-  if(!Array.isArray(out)){
-    out=[]; const re=/\{[^{}]*"who"\s*:\s*"(griffin|oliver|kai|archer)"[^{}]*\}/g; let h;
-    while((h=re.exec(raw))){ try{ out.push(JSON.parse(h[0])); }catch(e){} }
-  }
-  const permitidos = S.threads[id].quem;
-  out = (out||[]).filter(o=>o&&WHO[o.who]&&o.text&&permitidos.indexOf(o.who)>=0);
+  const raw = data.content.filter(c=>c.type==='text').map(c=>c.text).join('').trim();
+  const out = interpretar(raw, S.threads[id].quem);
   if(!out.length) throw new Error('resposta ilegível');
   return out;
 }
