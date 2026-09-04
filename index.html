@@ -382,6 +382,8 @@ SOBRE O QUE ELES FALAM. Não é um clube de leitura. A conversa vai pra onde a B
 NÃO SE REPITA. Antes de escrever, olhe o histórico: se uma observação, elogio ou pergunta já foi feita ali, não faça de novo com outras palavras. Se você não tem nada novo a dizer sobre o assunto, mude de assunto — isso é o que gente de verdade faz. A conversa tem que andar, não circular.
 
 
+PRIVADO É PRIVADO. Cada um deles tem uma conversa particular com a Bel, e essas conversas não são compartilhadas entre eles. Ninguém sabe o que a Bel falou no privado de outro, e ninguém finge saber. No privado eles dizem coisas que não diriam no grupo — é mais próximo, mais aberto, mais devagar. Só quem viveu a conversa pode levar aquilo pro grupo, e mesmo assim raramente.
+
 REGRAS:
 - Quando o assunto for a escrita dela, perguntam sobre a ESCRITA, nunca "quem te machucou". Tratam ela como colega, não como caso.
 - Percebem quando ela amolece uma verdade ("mas tá tudo bem", "esse não é bom") e apontam sem ser piegas.
@@ -411,6 +413,7 @@ const sy=t=>({k:'sys',text:t});
 
 function estadoInicial(){
   return {
+    ultimaPuxada: Date.now(),
     ordem:['griffin','group','archer','kai','oliver'],
     threads:{
       griffin:{ tipo:'dm', quem:['griffin'], aberto:true, naoLidas:0, fila:[], msgs:[
@@ -521,18 +524,44 @@ function transcrever(id){
   }).join('\n');
 }
 
+function resumoThread(id, limite){
+  const ult = S.threads[id].msgs.filter(m=>m.k==='msg'||m.k==='poem').slice(-limite);
+  if (!ult.length) return '';
+  return ult.map(m=>{
+    if (m.k==='poem') return 'bel enviou o poema "'+m.lbl+'"';
+    return (m.who==='me'?'bel':WHO[m.who].handle)+': '+m.text.slice(0,140);
+  }).join('\n');
+}
+
 function contextoOutras(id){
-  const partes = [];
-  for (const outro of S.ordem){
-    if (outro===id || !S.threads[outro].aberto) continue;
-    const t = S.threads[outro];
-    const ult = t.msgs.filter(m=>m.k==='msg').slice(-4);
-    if (!ult.length) continue;
-    const nome = outro==='group' ? 'no grupo' : 'no privado com '+WHO[outro].nome;
-    partes.push('--- '+nome+' ---\n' + ult.map(m=>
-      (m.who==='me'?'bel':WHO[m.who].handle)+': '+m.text.slice(0,120)).join('\n'));
+  const t = S.threads[id];
+
+  // num privado: ele sabe do grupo (todos veem) e do proprio privado. So isso.
+  if (t.tipo==='dm'){
+    const partes = [];
+    if (S.threads.group.aberto){
+      const g = resumoThread('group', 10);
+      if (g) partes.push('--- o que rolou no grupo (todos veem; você estava lá) ---\n'+g);
+    }
+    partes.push('Você NÃO sabe o que a Bel conversou em privado com os outros. Esses privados não são seus. '+
+      'Nunca mencione nem dê a entender que sabe.');
+    partes.push('Aqui, no privado, você fala coisas que não falaria no grupo. É um canal de duas pessoas.');
+    return '\n\nCONTEXTO:\n'+partes.join('\n\n');
   }
-  return partes.length ? '\n\nO QUE ANDA ACONTECENDO EM OUTRAS CONVERSAS (contexto; eles sabem disso):\n'+partes.join('\n') : '';
+
+  // no grupo: cada um so tem na cabeca o proprio privado
+  const partes = [];
+  for (const quem of t.quem){
+    if (!S.threads[quem] || !S.threads[quem].aberto) continue;
+    const r = resumoThread(quem, 5);
+    if (!r) continue;
+    partes.push('--- SÓ '+WHO[quem].nome+' sabe disto (privado dele com a Bel; os outros três não fazem ideia) ---\n'+r);
+  }
+  if (!partes.length) return '';
+  return '\n\nCONTEXTO PRIVADO — leia com cuidado:\n'+partes.join('\n\n')+
+    '\n\nREGRA DE SIGILO: cada um desses trechos pertence só à pessoa nomeada. Os outros não sabem nada disso e não podem citar, ' +
+    'nem por acaso. Quem viveu a conversa pode trazer o assunto pro grupo, mas raramente, e sabendo que está expondo uma coisa que ' +
+    'a Bel contou só pra ele — o normal é guardar. Se alguém trouxer, é uma escolha com peso, e a Bel pode não gostar.';
 }
 
 const EMPURRÕES = [
@@ -665,6 +694,90 @@ function escoar(){
 function talvezGerar(id){
   if (Date.now()-ultimaMinha(id) >= MIN_DELAY*60000) gerar(id,false);
   else atualizarHint();
+}
+
+/* ---- eles puxam conversa sozinhos ---- */
+const PUXADA = {
+  horas: 4,     // tempo minimo sem ninguem puxar conversa
+  chance: 0.7   // e mesmo assim nem sempre acontece
+};
+
+function ultimaAtividade(id){
+  const m = S.threads[id].msgs;
+  for (let i=m.length-1;i>=0;i--) if (m[i].ts) return m[i].ts;
+  return 0;
+}
+
+async function puxar(id){
+  if (busy) return;
+  const t = S.threads[id];
+  const w = WHO[t.quem[0]];
+  busy = true;
+
+  // ele viu ela falar alguma coisa no grupo e ficou pensando nisso?
+  const falasDela = S.threads.group.aberto
+    ? S.threads.group.msgs.filter(m=>(m.k==='msg'&&m.who==='me')||m.k==='poem').slice(-6)
+    : [];
+  const puxaDoGrupo = falasDela.length > 0 && Math.random() < 0.5;
+
+  let motivo;
+  if (puxaDoGrupo){
+    motivo = 'Ele ficou pensando numa coisa que a Bel disse NO GRUPO e está chamando ela no privado por causa disso — '+
+      'porque não quis dizer na frente dos outros três, ou porque a resposta que ele deu lá foi curta demais, ou porque '+
+      'no grupo virou piada e ele quis voltar no assunto direito. Ele diz de onde veio ("that thing you said in the group…", '+
+      '"i keep thinking about what you wrote earlier"). Escolha uma fala específica dela no grupo, não uma coisa genérica.';
+  } else {
+    motivo = 'Ele lembrou dela do nada. Pode ser qualquer coisa: uma coisa que aconteceu com ele hoje, uma pergunta solta, '+
+      'uma coisa que ele lembrou de um poema dela dias depois, uma reclamação, uma bobagem. '+
+      'Não retome o assunto exato de onde a conversa privada parou — isso é uma mensagem nova, de outro momento.';
+  }
+
+  const instr = '\n\nESTA CONVERSA é um privado entre Bel e '+w.nome+' ('+w.handle+'). '+
+    'IMPORTANTE: a Bel NÃO mandou nada. É '+w.nome+' que está puxando conversa. '+motivo+' '+
+    'De 1 a 3 mensagens, curtas. Toda linha começa com "'+t.quem[0]+':".';
+
+  try{
+    const body = { system: BASE + instr + contextoOutras(id), transcript: transcrever(id) || '(ainda não conversaram no privado)' };
+    const res = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data = await res.json();
+    if (data.error || !data.content) throw new Error('falhou');
+    const raw = data.content.filter(c=>c.type==='text').map(c=>c.text).join('').trim();
+    const out = interpretar(raw, t.quem).slice(0,3);
+    if (out.length){
+      const desde = S.ultimaPuxada || (Date.now() - PUXADA.horas*3600000);
+      let at = desde + Math.random()*(Date.now()-desde);
+      if (at > Date.now()-60000) at = Date.now()-60000;
+      out.forEach((m,i)=>{
+        const q = at + i*(40000+Math.random()*80000);
+        t.msgs.push({k:'msg',who:m.who,text:m.text,t:stamp(q),ts:Math.round(q)});
+      });
+      if (id !== atual) t.naoLidas = (t.naoLidas||0) + out.length;
+      S.ultimaPuxada = Date.now();
+      salvar(); desenhar();
+    }
+  }catch(e){}
+  busy = false;
+}
+
+function talvezPuxar(){
+  if (busy) return;
+  if (!S.threads.group.aberto) return;
+  const agora = Date.now();
+  const desde = S.ultimaPuxada || 0;
+  if (agora - desde < PUXADA.horas*3600000) return;
+
+  S.ultimaPuxada = agora; salvar();       // fecha a janela mesmo se nao rolar
+  if (Math.random() > PUXADA.chance) return;
+
+  // prefere quem esta mais tempo sem falar no privado
+  const cands = ['griffin','archer','kai','oliver'].filter(id=>{
+    const t = S.threads[id];
+    return t.aberto && !(t.fila||[]).length && !pendentes(id);
+  });
+  if (!cands.length) return;
+  cands.sort((a,b)=>ultimaAtividade(a)-ultimaAtividade(b));
+  const escolhido = cands[Math.random()<0.6 ? 0 : Math.floor(Math.random()*cands.length)];
+  puxar(escolhido);
 }
 
 function responderAgora(){
@@ -852,9 +965,12 @@ document.addEventListener('visibilitychange', function(){
   if (document.visibilityState!=='visible') return;
   flushTudo();
   if (atual && !(S.threads[atual].fila||[]).length && pendentes(atual)) talvezGerar(atual);
+  else talvezPuxar();
 });
 
 carregar();
+if (!S.ultimaPuxada) { S.ultimaPuxada = Date.now(); salvar(); }
 flushTudo();
 telaLista();
+setTimeout(talvezPuxar, 1500);
 </script>
