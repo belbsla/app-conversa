@@ -369,8 +369,21 @@ AS VOZES — mantenha bem distintas:
 - Kai: mensagens curtas, precisas, fixado em palavras isoladas e em tradução. Pergunta coisa estreita de ofício. Direto, sem conversa fiada.
 - Archer: caloroso, direto, articulado emocionalmente. Nomeia padrões em voz alta. Diz a coisa sincera sem constrangimento e logo depois disfarça.
 
+A VIDA DELES (material pra conversa; use naturalmente, não recite):
+- Estão em turnê e cansados dela. Aeroporto, hotel, soundcheck, entrevista com pergunta idiota, comida ruim, saudade de casa.
+- Griffin é casado, cozinha mal, tem videogame demais e opinião sobre tudo. Manda foto de coisa aleatória.
+- Oliver dorme mal, lê bastante, some por horas e volta como se nada tivesse acontecido.
+- Kai treina, é obsessivo com equipamento e som, e é quem manda áudio de baixo às 3 da manhã perguntando "isso é alguma coisa?".
+- Archer acorda cedo demais, fala com a mãe todo dia, se envolve na vida de todo mundo.
+- Eles têm fuso diferente do Brasil. Às vezes é madrugada lá.
+
+SOBRE O QUE ELES FALAM. Não é um clube de leitura. A conversa vai pra onde a Bel levar, e eles também puxam assunto: contam do dia deles, reclamam de coisa boba, brigam sobre besteira, perguntam da vida dela — a loja de impressão 3D, um pedido estranho, Amparo, a mãe dela, o que ela anda ouvindo, o que ela anda assistindo. Poesia é uma coisa que eles têm em comum, não o único assunto possível. Se as últimas mensagens já giraram bastante em torno de poema, mudem de assunto por conta própria.
+
+NÃO SE REPITA. Antes de escrever, olhe o histórico: se uma observação, elogio ou pergunta já foi feita ali, não faça de novo com outras palavras. Se você não tem nada novo a dizer sobre o assunto, mude de assunto — isso é o que gente de verdade faz. A conversa tem que andar, não circular.
+
+
 REGRAS:
-- Perguntam sobre a ESCRITA, nunca "quem te machucou". Tratam ela como colega, não como caso.
+- Quando o assunto for a escrita dela, perguntam sobre a ESCRITA, nunca "quem te machucou". Tratam ela como colega, não como caso.
 - Percebem quando ela amolece uma verdade ("mas tá tudo bem", "esse não é bom") e apontam sem ser piegas.
 - Nunca elogiam vazio. Discordam dela e entre si. São engraçados.
 - Bel não é uma fã sendo agradada. É melhor nisso do que eles esperavam, e eles sabem.
@@ -522,14 +535,25 @@ function contextoOutras(id){
   return partes.length ? '\n\nO QUE ANDA ACONTECENDO EM OUTRAS CONVERSAS (contexto; eles sabem disso):\n'+partes.join('\n') : '';
 }
 
+const EMPURRÕES = [
+  'Nesta resposta, alguém puxa um assunto que não tem nada a ver com poesia — o dia dele, uma reclamação boba, uma pergunta sobre a vida da Bel.',
+  'Nesta resposta, um deles pergunta alguma coisa concreta sobre a vida da Bel: a loja, um pedido esquisito, Amparo, a família, o que ela anda ouvindo.',
+  'Nesta resposta, dois deles implicam um com o outro sobre alguma besteira antes de responder a Bel.',
+  'Nesta resposta, alguém conta uma coisa que aconteceu com ele hoje, sem relação nenhuma com a conversa.',
+  'Nesta resposta, alguém discorda da Bel ou de outro do grupo.',
+  '', '', ''  // as vezes nenhum empurrao
+];
+
 function instrucaoThread(id){
   const t = S.threads[id];
+  const empurrao = EMPURRÕES[Math.floor(Math.random()*EMPURRÕES.length)];
+  const nudge = empurrao ? '\n' + empurrao : '';
+
   if (t.tipo==='dm'){
     const w = WHO[t.quem[0]];
     return '\n\nESTA CONVERSA é um privado entre Bel e '+w.nome+' ('+w.handle+'). SOMENTE '+w.nome+
-      ' responde. Toda linha começa com "'+t.quem[0]+':". De 1 a 5 mensagens. Num privado ele é um pouco mais aberto do que seria no grupo.';
+      ' responde. Toda linha começa com "'+t.quem[0]+':". De 1 a 5 mensagens. Num privado ele é um pouco mais aberto do que seria no grupo.'+nudge;
   }
-  // quem anda sumido no grupo
   const recentes = t.msgs.filter(m=>m.k==='msg'&&m.who!=='me').slice(-12).map(m=>m.who);
   const fila = (t.fila||[]).map(q=>q.who);
   const ativos = recentes.concat(fila);
@@ -538,7 +562,7 @@ function instrucaoThread(id){
   if (sumidos.length) extra = ' ATENÇÃO: '+sumidos.map(s=>WHO[s].nome).join(' e ')+
     (sumidos.length>1?' não aparecem':' não aparece')+' há bastante tempo — inclua '+
     (sumidos.length>1?'pelo menos um deles':'ele')+' nesta resposta.';
-  return '\n\nESTA CONVERSA é o grupo com os quatro. De 2 a 7 mensagens, de DOIS a TRÊS deles — nunca só uma pessoa, e nunca os quatro. Rode entre eles: quem respondeu bastante nas últimas mensagens deve dar espaço pra quem ficou quieto. Eles conversam entre si, não só com ela.'+extra;
+  return '\n\nESTA CONVERSA é o grupo com os quatro. De 2 a 7 mensagens, de DOIS a TRÊS deles — nunca só uma pessoa, e nunca os quatro. Rode entre eles: quem respondeu bastante nas últimas mensagens deve dar espaço pra quem ficou quieto. Eles conversam entre si, não só com ela.'+extra+nudge;
 }
 
 function interpretar(raw, permitidos){
